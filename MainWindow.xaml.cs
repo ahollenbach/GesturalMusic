@@ -144,6 +144,17 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// Current status text to display
         /// </summary>
         private UdpWriter osc;
+        private UdpWriter oscLocal;
+
+        private void ActivateSignalClick(object sender, RoutedEventArgs e)
+        {
+            // Trigger to OSC
+            OscElement elem = new OscElement("/test", 1);
+            osc.Send(elem);
+
+            // for testing purposes, also send to local
+            oscLocal.Send(elem);
+        }
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -152,6 +163,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         {
             // Set up OSC
             osc = new UdpWriter(oscHost, oscPort);
+            oscLocal = new UdpWriter("127.0.0.1", 8000);
 
             // one sensor is currently supported
             this.kinectSensor = KinectSensor.GetDefault();
@@ -364,6 +376,9 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         // Trigger to OSC
                         OscElement elem = new OscElement("/test", 1);
                         osc.Send(elem);
+
+                        // for testing purposes, also send to local
+                        oscLocal.Send(elem);
                     }
                     else
                     {
