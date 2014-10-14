@@ -355,18 +355,19 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         }
                     }
 
-                    bool trigger  = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
+                    bool trigger = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
 
                     SolidColorBrush color;
-                    if (trigger) 
+                    if (trigger)
                     {
-                        color =  Brushes.LightGray;
+                        color = Brushes.LightGray;
                         // Trigger to OSC
                         OscElement elem = new OscElement("/test", 1);
                         osc.Send(elem);
-                    } else 
+                    }
+                    else
                     {
-                        color =  Brushes.Black;
+                        color = Brushes.Black;
                     }
                     dc.DrawRectangle(color, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                     // END: Andrew
