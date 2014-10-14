@@ -133,7 +133,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.96.182";
+        private String oscHost = "127.0.0.1";
 
         /// <summary>
         /// The port to send to: default 8000
