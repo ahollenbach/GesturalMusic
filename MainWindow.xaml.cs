@@ -149,7 +149,16 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         private void ActivateSignalClick(object sender, RoutedEventArgs e)
         {
             // Trigger to OSC
-            OscElement elem = new OscElement("/test", 1);
+            OscElement elem = new OscElement("/activation", 1);
+            osc.Send(elem);
+
+            // for testing purposes, also send to local
+            oscLocal.Send(elem);
+        }
+        private void DeactivateSignalClick(object sender, RoutedEventArgs e)
+        {
+            // Trigger to OSC
+            OscElement elem = new OscElement("/activation", 0);
             osc.Send(elem);
 
             // for testing purposes, also send to local
@@ -374,15 +383,23 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     {
                         color = Brushes.LightGray;
                         // Trigger to OSC
-                        OscElement elem = new OscElement("/test", 1);
+                        OscElement elem = new OscElement("/activation", 1);
                         osc.Send(elem);
 
                         // for testing purposes, also send to local
                         oscLocal.Send(elem);
+
+                        CameraSpacePoint position = b.Joints[JointType.HandLeft].Position;
+                        OscElement vol = new OscElement("/volume", Clamp(2-position.Y,0,1));
+                        osc.Send(vol);
+                        oscLocal.Send(vol);
                     }
                     else
                     {
                         color = Brushes.Black;
+                        OscElement elem = new OscElement("/activation", 0);
+                        osc.Send(elem);
+                        oscLocal.Send(elem);
                     }
                     dc.DrawRectangle(color, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                     // END: Andrew
@@ -426,6 +443,11 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 }
             }
+        }
+
+        private static float Clamp(float value, float min, float max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
         }
 
         /// <summary>
