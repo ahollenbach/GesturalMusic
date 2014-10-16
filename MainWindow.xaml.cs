@@ -390,7 +390,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         oscLocal.Send(elem);
 
                         CameraSpacePoint position = b.Joints[JointType.HandLeft].Position;
-                        OscElement vol = new OscElement("/volume", Clamp(2-position.Y,0,1));
+                        Console.WriteLine(position.Y);
+                        OscElement vol = new OscElement("/volume", Clamp(position.Y,0,1));
                         osc.Send(vol);
                         oscLocal.Send(vol);
                     }
