@@ -133,7 +133,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.80.161";
+        private String oscHost = "129.21.115.195";
 
         /// <summary>
         /// The port to send to: default 8000
@@ -365,8 +365,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 using (DrawingContext dc = this.drawingGroup.Open())
                 {
-                    // Author: Andrew
-                    // Added a trigger of two open hands to fire an event. In this case, to change the color of the background
+                    // Selects the last body that is tracked and use that for our calculations
                     Body b = this.bodies[0];
                     foreach (Body body in this.bodies)
                     {
@@ -376,34 +375,61 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         }
                     }
 
-                    bool trigger = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
+                    ///////////////////////////////////////////////////////////////////////
+                    // Send OSC Triggers
+                    ///////////////////////////////////////////////////////////////////////
 
+                    // trigger start if both left and right hand are open
+                    bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
+                    CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
+                    CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
+                    // trigger end if both left and right hand are closed and below the Kinect
+                    bool triggerEnd = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
+
+                    if (triggerStart)
+                    {
+                        OscElement play = new OscElement("/play", 1);
+                        osc.Send(play);
+                        oscLocal.Send(play);
+                    }
+                    if (triggerEnd)
+                    {
+                        OscElement play = new OscElement("/play", 0);
+                        osc.Send(play);
+                        oscLocal.Send(play);
+                    }
+
+                    // Send pitch as a value from 0 to 127. 
+                    OscElement pitch = new OscElement("/pitch", Clamp((float)Math.Floor(rHandPos.X * 127),0,127));
+                    osc.Send(pitch);
+                    oscLocal.Send(pitch);
+                    // print out to check if it's actually right
+                    Console.WriteLine(Math.Floor(rHandPos.X * 127));
+
+                    // Send volume as a value between 0 and 1
+                    OscElement vol = new OscElement("/volume", Clamp(lHandPos.Y,0,1));
+                    osc.Send(vol);
+                    oscLocal.Send(vol);
+
+
+
+                    ///////////////////////////////////////////////////////////////////////
+                    // Draw the Screen
+                    ///////////////////////////////////////////////////////////////////////
+
+                    // If we detect either a trigger to start or stop the track, change the background color
                     SolidColorBrush color;
-                    if (trigger)
+                    if (triggerStart || triggerEnd)
                     {
                         color = Brushes.LightGray;
-                        // Trigger to OSC
-                        OscElement elem = new OscElement("/activation", 1);
-                        osc.Send(elem);
-
-                        // for testing purposes, also send to local
-                        oscLocal.Send(elem);
-
-                        CameraSpacePoint position = b.Joints[JointType.HandLeft].Position;
-                        Console.WriteLine(position.Y);
-                        OscElement vol = new OscElement("/volume", Clamp(position.Y,0,1));
-                        osc.Send(vol);
-                        oscLocal.Send(vol);
-                    }
-                    else
+                    } else 
                     {
                         color = Brushes.Black;
-                        OscElement elem = new OscElement("/activation", 0);
-                        osc.Send(elem);
-                        oscLocal.Send(elem);
                     }
                     dc.DrawRectangle(color, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                    // END: Andrew
+
+
+
 
                     int penIndex = 0;
                     foreach (Body body in this.bodies)
