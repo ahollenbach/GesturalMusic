@@ -145,23 +145,34 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// </summary>
         private UdpWriter osc;
         private UdpWriter oscLocal;
+        Random r = new Random();
 
         private void ActivateSignalClick(object sender, RoutedEventArgs e)
         {
             // Trigger to OSC
-            OscElement elem = new OscElement("/activation", 1);
+            OscElement elem = new OscElement("/play", 1);
             osc.Send(elem);
-
-            // for testing purposes, also send to local
             oscLocal.Send(elem);
+
+            // Send pitch as a value from 0 to 127. 
+            float rpos = (float) r.NextDouble();
+            float lpos = (float) r.NextDouble();
+            OscElement pitch = new OscElement("/pitch", Clamp((float)Math.Floor(rpos * 127), 0, 127));
+            osc.Send(pitch);
+            oscLocal.Send(pitch);
+            Console.WriteLine("pitch:  " + Clamp((float)Math.Floor(rpos * 127), 0, 127));
+            Console.WriteLine("volume: " + Clamp(lpos, 0, 1));
+
+            // Send volume as a value between 0 and 1
+            OscElement vol = new OscElement("/volume", Clamp(lpos, 0, 1));
+            osc.Send(vol);
+            oscLocal.Send(vol);
         }
         private void DeactivateSignalClick(object sender, RoutedEventArgs e)
         {
             // Trigger to OSC
-            OscElement elem = new OscElement("/activation", 0);
+            OscElement elem = new OscElement("/play", 0);
             osc.Send(elem);
-
-            // for testing purposes, also send to local
             oscLocal.Send(elem);
         }
 
@@ -428,6 +439,9 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     }
                     dc.DrawRectangle(color, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
+                    // Crosshairs so the user can know where positive/negative are for each limb
+                    dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
+                    dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
 
 
 
