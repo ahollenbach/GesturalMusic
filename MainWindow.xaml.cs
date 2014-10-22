@@ -147,33 +147,34 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         private UdpWriter oscLocal;
         Random r = new Random();
 
+        /// <summary>
+        /// A dictionary of Ableton slider controllers.
+        /// This will contain elements such as volume and pitch.
+        /// The sliders can be fetched by their name (i.e. "pitch").
+        /// </summary>
+        Dictionary<string, AbletonSliderController> sliders;
+
+        /// <summary>
+        /// A dictionary of Ableton switch controllers.
+        /// This will contain elements such as play.
+        /// The sliders can be fetched by their name (i.e. "play").
+        /// </summary>
+        Dictionary<string, AbletonSwitchController> switches;
+
         private void ActivateSignalClick(object sender, RoutedEventArgs e)
         {
-            // Trigger to OSC
-            OscElement elem = new OscElement("/play", 1);
-            osc.Send(elem);
-            oscLocal.Send(elem);
+            switches["play"].SwitchOn();
 
             // Send pitch as a value from 0 to 127. 
-            float rpos = (float) r.NextDouble();
-            float lpos = (float) r.NextDouble();
-            OscElement pitch = new OscElement("/pitch", Clamp((float)Math.Floor(rpos * 127), 0, 127));
-            osc.Send(pitch);
-            oscLocal.Send(pitch);
-            Console.WriteLine("pitch:  " + Clamp((float)Math.Floor(rpos * 127), 0, 127));
-            Console.WriteLine("volume: " + Clamp(lpos, 0, 1));
+            float vol = (float) r.NextDouble();
+            float pitch = (float)r.NextDouble() * 127;
 
-            // Send volume as a value between 0 and 1
-            OscElement vol = new OscElement("/volume", Clamp(lpos, 0, 1));
-            osc.Send(vol);
-            oscLocal.Send(vol);
+            sliders["volume"].Send(vol);
+            sliders["pitch"].Send(pitch);
         }
         private void DeactivateSignalClick(object sender, RoutedEventArgs e)
         {
-            // Trigger to OSC
-            OscElement elem = new OscElement("/play", 0);
-            osc.Send(elem);
-            oscLocal.Send(elem);
+            switches["play"].SwitchOff();
         }
 
         /// <summary>
@@ -181,9 +182,28 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// </summary>
         public MainWindow()
         {
+            ///////////////////////////////////////////////////////////////////////
             // Set up OSC
+            ///////////////////////////////////////////////////////////////////////
             osc = new UdpWriter(oscHost, oscPort);
             oscLocal = new UdpWriter("127.0.0.1", 8000);
+
+            ///////////////////////////////////////////////////////////////////////
+            // Initialize Ableton controllers
+            ///////////////////////////////////////////////////////////////////////
+
+            // Set up the Ableton slider controllers
+            sliders = new Dictionary<string,AbletonSliderController>();
+            sliders.Add("volume",new AbletonSliderController(oscLocal, "volume", 0, 1, true));
+            sliders.Add("pitch", new AbletonSliderController(oscLocal, "pitch", 0, 127, false));
+
+            // Set up the Ableton switch controllers
+            switches = new Dictionary<string, AbletonSwitchController>();
+            switches.Add("play", new AbletonSwitchController(oscLocal, "play"));
+
+            ///////////////////////////////////////////////////////////////////////
+            // Initialize Kinect
+            ///////////////////////////////////////////////////////////////////////
 
             // one sensor is currently supported
             this.kinectSensor = KinectSensor.GetDefault();
@@ -390,39 +410,28 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     // Send OSC Triggers
                     ///////////////////////////////////////////////////////////////////////
 
-                    // trigger start if both left and right hand are open
-                    bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
                     CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
                     CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
+
+                    // trigger start if both left and right hand are open
+                    bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
                     // trigger end if both left and right hand are closed and below the Kinect
                     bool triggerEnd = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
 
                     if (triggerStart)
                     {
-                        OscElement play = new OscElement("/play", 1);
-                        osc.Send(play);
-                        oscLocal.Send(play);
+                        switches["play"].SwitchOn();
                     }
                     if (triggerEnd)
                     {
-                        OscElement play = new OscElement("/play", 0);
-                        osc.Send(play);
-                        oscLocal.Send(play);
+                        switches["play"].SwitchOff();
                     }
 
                     // Send pitch as a value from 0 to 127. 
-                    OscElement pitch = new OscElement("/pitch", Clamp((float)Math.Floor(rHandPos.X * 127),0,127));
-                    osc.Send(pitch);
-                    oscLocal.Send(pitch);
-                    // print out to check if it's actually right
-                    Console.WriteLine(Math.Floor(rHandPos.X * 127));
+                    sliders["pitch"].Send(rHandPos.Y * 127);
 
                     // Send volume as a value between 0 and 1
-                    OscElement vol = new OscElement("/volume", Clamp(lHandPos.Y,0,1));
-                    osc.Send(vol);
-                    oscLocal.Send(vol);
-
-
+                    sliders["volume"].Send(lHandPos.Y);
 
                     ///////////////////////////////////////////////////////////////////////
                     // Draw the Screen
