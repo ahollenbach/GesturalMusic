@@ -30,5 +30,6 @@
             <Button x:Name="activateButton" Content="Activate" Width="100" Click="ActivateSignalClick" />
             <Button x:Name="deactivateButton" Content="Deactivate" Width="100" Click="DeactivateSignalClick" />
         </StatusBar>
+        <TextBlock HorizontalAlignment="Left" Margin="433,10,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="44" Width="231" Name="DisplayValue" FontSize="36" />
     </Grid>
 </Window>

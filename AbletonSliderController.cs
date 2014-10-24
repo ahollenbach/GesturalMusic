@@ -41,16 +41,22 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// <param name="value">The value to send.</param>
         public override void Send(float value)
         {
+            OscElement elem;
             value = Clamp(value);
 
             // If not contiguous, convert all values to discrete integer steps
             if (!contiguous)
             {
                 value = (float) Math.Floor(value);
+
+                Console.WriteLine(this.controlName + ": " + value);
+                elem = new OscElement(controlName, (int) value);
+                osc.Send(elem);
+                return;
             }
 
             Console.WriteLine(this.controlName + ": " + value);
-            OscElement elem = new OscElement(controlName, value);
+            elem = new OscElement(controlName, value);
             osc.Send(elem);
         }
 

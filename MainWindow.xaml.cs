@@ -17,6 +17,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
     using System.Windows.Media.Imaging;
     using Microsoft.Kinect;
     using Ventuz.OSC;
+    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -133,7 +134,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.115.195";
+        private String oscHost = "129.21.113.232";
 
         /// <summary>
         /// The port to send to: default 8000
@@ -194,12 +195,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
             // Set up the Ableton slider controllers
             sliders = new Dictionary<string,AbletonSliderController>();
-            sliders.Add("volume",new AbletonSliderController(oscLocal, "volume", 0, 1, true));
-            sliders.Add("pitch", new AbletonSliderController(oscLocal, "pitch", 0, 127, false));
+            sliders.Add("volume", new AbletonSliderController(osc, "volume", 0, 1, true));
+            sliders.Add("pitch", new AbletonSliderController(osc, "pitch", 0, 127, false));
 
             // Set up the Ableton switch controllers
             switches = new Dictionary<string, AbletonSwitchController>();
-            switches.Add("play", new AbletonSwitchController(oscLocal, "play"));
+            switches.Add("play", new AbletonSwitchController(osc, "play"));
 
             ///////////////////////////////////////////////////////////////////////
             // Initialize Kinect
@@ -427,8 +428,10 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         switches["play"].SwitchOff();
                     }
 
-                    // Send pitch as a value from 0 to 127. 
+                    // Send pitch as a value from 0 to 127.
                     sliders["pitch"].Send(rHandPos.Y * 127);
+                    TextBlock dispVal = (TextBlock) this.FindName("DisplayValue");
+                    dispVal.Text = rHandPos.X + "," + rHandPos.Y;
 
                     // Send volume as a value between 0 and 1
                     sliders["volume"].Send(lHandPos.Y);
