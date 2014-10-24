@@ -137,9 +137,9 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         private String oscHost = "129.21.113.232";
 
         /// <summary>
-        /// The port to send to: default 8000
+        /// The port to send to: default 9001
         /// </summary>
-        private int oscPort = 8000;
+        private int oscPort = 9001;
 
         /// <summary>
         /// Current status text to display
@@ -147,6 +147,10 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         private UdpWriter osc;
         private UdpWriter oscLocal;
         Random r = new Random();
+
+        int velocity = 100;
+        int duration = 1000;
+        bool sendNote = false;
 
         /// <summary>
         /// A dictionary of Ableton slider controllers.
@@ -187,7 +191,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             // Set up OSC
             ///////////////////////////////////////////////////////////////////////
             osc = new UdpWriter(oscHost, oscPort);
-            oscLocal = new UdpWriter("127.0.0.1", 8000);
+            oscLocal = new UdpWriter("127.0.0.1", 9001);
 
             ///////////////////////////////////////////////////////////////////////
             // Initialize Ableton controllers
@@ -196,7 +200,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             // Set up the Ableton slider controllers
             sliders = new Dictionary<string,AbletonSliderController>();
             sliders.Add("volume", new AbletonSliderController(osc, "volume", 0, 1, true));
-            sliders.Add("pitch", new AbletonSliderController(osc, "pitch", 0, 127, false));
+            sliders.Add("pitch", new AbletonSliderController(osc, "pitch", 0, 1, true));
 
             // Set up the Ableton switch controllers
             switches = new Dictionary<string, AbletonSwitchController>();
@@ -411,6 +415,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     // Send OSC Triggers
                     ///////////////////////////////////////////////////////////////////////
 
+                    // if (b.HandRightState == HandState.Lasso && !sendNote)
+                    // {
+                    //     sendNote = true;
+                    //     OscElement note = new OscElement("/makenote", velocity);
+                    // }
+
                     CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
                     CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
 
@@ -429,7 +439,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     }
 
                     // Send pitch as a value from 0 to 127.
-                    sliders["pitch"].Send(rHandPos.Y * 127);
+                    sliders["pitch"].Send(rHandPos.Y);
                     TextBlock dispVal = (TextBlock) this.FindName("DisplayValue");
                     dispVal.Text = rHandPos.X + "," + rHandPos.Y;
 
