@@ -467,6 +467,11 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                     // If we detect either a trigger to start or stop the track, change the background color
                     SolidColorBrush color;
+                    if (spineMidPos.Z > 2.5)
+                    {
+                        color = Brushes.DarkBlue;
+                    }
+                    // let the triggers overwrite if necessary
                     if (triggerStart || triggerEnd)
                     {
                         color = Brushes.LightGray;
