@@ -19,7 +19,7 @@
 
         <Image Grid.Row="0" Source="Images\Logo.png" HorizontalAlignment="Left" Stretch="Fill" Height="32" Width="81" Margin="0 10 0 5" />
         <TextBlock Grid.Row="0" Margin="0 0 -1 0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">GesturalMusic</TextBlock>
-        <Image Grid.Row="0" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="0 0 0 5" />
+        <Image Grid.Row="0" Source="Images\Status.png" Stretch="None" HorizontalAlignment="Center" Margin="307,-19,316.6,24.2" />
 
         <Viewbox Grid.Row="1" HorizontalAlignment="Center">
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
@@ -30,6 +30,5 @@
             <Button x:Name="activateButton" Content="Activate" Width="100" Click="ActivateSignalClick" />
             <Button x:Name="deactivateButton" Content="Deactivate" Width="100" Click="DeactivateSignalClick" />
         </StatusBar>
-        <TextBlock HorizontalAlignment="Left" Margin="433,10,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="44" Width="231" Name="DisplayValue" FontSize="36" />
     </Grid>
 </Window>

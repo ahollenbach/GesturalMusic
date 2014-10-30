@@ -148,9 +148,6 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         private UdpWriter oscLocal;
         Random r = new Random();
 
-        int velocity = 100;
-        int duration = 1000;
-        bool sendNote = false;
 
         /// <summary>
         /// A dictionary of Ableton slider controllers.
@@ -165,6 +162,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// The sliders can be fetched by their name (i.e. "play").
         /// </summary>
         Dictionary<string, AbletonSwitchController> switches;
+
+        string[] instruments;
 
         private void ActivateSignalClick(object sender, RoutedEventArgs e)
         {
@@ -196,15 +195,18 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             ///////////////////////////////////////////////////////////////////////
             // Initialize Ableton controllers
             ///////////////////////////////////////////////////////////////////////
+            // Instruments
+            instruments = new string[4] { "egypt", "dubstep", "guiro", "house" };
 
             // Set up the Ableton slider controllers
             sliders = new Dictionary<string,AbletonSliderController>();
-            sliders.Add("volume", new AbletonSliderController(osc, "volume", 0, 1, true));
-            sliders.Add("pitch", new AbletonSliderController(osc, "pitch", 0, 1, true));
-
-            // Set up the Ableton switch controllers
             switches = new Dictionary<string, AbletonSwitchController>();
-            switches.Add("play", new AbletonSwitchController(osc, "play"));
+
+            for (int i = 0; i < instruments.Length; i++)
+            {
+                sliders.Add(instruments[i] + "/volume", new AbletonSliderController(oscLocal, instruments[i] + "/volume", 0, 1, true));
+                switches.Add(instruments[i] + "/play", new AbletonSwitchController(oscLocal, instruments[i] + "/play"));
+            }
 
             ///////////////////////////////////////////////////////////////////////
             // Initialize Kinect
@@ -415,14 +417,29 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     // Send OSC Triggers
                     ///////////////////////////////////////////////////////////////////////
 
-                    // if (b.HandRightState == HandState.Lasso && !sendNote)
-                    // {
-                    //     sendNote = true;
-                    //     OscElement note = new OscElement("/makenote", velocity);
-                    // }
-
+                    CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
                     CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
                     CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
+
+                    // set partition
+                    //   3   |  2
+                    //  -----------
+                    //   1   |  0
+                    //    kinect
+                    int partition = 0;
+                    if(spineMidPos.X < 0)
+                    {
+                        partition = 0;
+                    }
+                    else
+                    {
+                        partition = 1;
+                    }
+                    Console.WriteLine(spineMidPos.Z);
+                    if (spineMidPos.Z > 2.5)
+                    {
+                        partition += 2; // add 2 to make it the back partition
+                    }
 
                     // trigger start if both left and right hand are open
                     bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
@@ -431,20 +448,18 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                     if (triggerStart)
                     {
-                        switches["play"].SwitchOn();
+                        switches[instruments[partition] + "/play"].SwitchOn();
                     }
                     if (triggerEnd)
                     {
-                        switches["play"].SwitchOff();
+                        switches[instruments[partition] + "/play"].SwitchOff();
                     }
 
-                    // Send pitch as a value from 0 to 127.
-                    sliders["pitch"].Send(rHandPos.Y);
-                    TextBlock dispVal = (TextBlock) this.FindName("DisplayValue");
-                    dispVal.Text = rHandPos.X + "," + rHandPos.Y;
-
-                    // Send volume as a value between 0 and 1
-                    sliders["volume"].Send(lHandPos.Y);
+                    if (b.HandLeftState == HandState.Lasso)
+                    {
+                        // Send volume as a value between 0 and 1, only when thumbs up
+                        sliders[instruments[partition] + "/volume"].Send(lHandPos.Y);
+                    }
 
                     ///////////////////////////////////////////////////////////////////////
                     // Draw the Screen
