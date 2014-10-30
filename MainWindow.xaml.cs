@@ -435,8 +435,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     {
                         partition = 1;
                     }
-                    Console.WriteLine(spineMidPos.Z);
-                    if (spineMidPos.Z > 2.5)
+                    double stagemidpoint = 2.5;
+                    if (spineMidPos.Z > stagemidpoint)
                     {
                         partition += 2; // add 2 to make it the back partition
                     }
