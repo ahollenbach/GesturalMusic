@@ -427,11 +427,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     //   1   |  0
                     //    kinect
                     int partition = 0;
-                    if(spineMidPos.X < 0)
-                    {
-                        partition = 0;
-                    }
-                    else
+                    if(spineMidPos.X > 0)
                     {
                         partition = 1;
                     }
