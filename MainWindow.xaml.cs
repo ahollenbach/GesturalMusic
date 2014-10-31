@@ -425,8 +425,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     {
                         partition = 1;
                     }
-                    double stagemidpoint = 2.9;
-                    if (spineMidPos.Z > stagemidpoint)
+                    if (spineMidPos.Z > KinectStageArea.GetCenterZ())
                     {
                         partition += 2; // add 2 to make it the back partition
                     }
@@ -454,17 +453,15 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     ///////////////////////////////////////////////////////////////////////
                     // Draw the Screen
                     ///////////////////////////////////////////////////////////////////////
+                    Console.WriteLine(spineMidPos.X + " " + spineMidPos.Z);
 
                     // If we detect either a trigger to start or stop the track, change the background color
-                    SolidColorBrush color;
-                    Console.WriteLine(spineMidPos.Z);
-                    
-                    // let the triggers overwrite if necessary
+                    SolidColorBrush color;                    
                     if (triggerStart || triggerEnd)
                     {
                         color = Brushes.LightGray;
                     }
-                    else if (spineMidPos.Z > 2.9)
+                    else if (spineMidPos.Z > KinectStageArea.GetCenterZ())
                     {
                         color = Brushes.DarkBlue;
                     }
