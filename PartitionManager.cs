@@ -14,12 +14,24 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         Quad
     }
 
+    class PartitionManager
+    {
+        public static Partition GetPartition()
+        {
+            return Partition.Left;
+        }
+    }
+
     // facing the Kinect
     enum Partition
     {
         Left,
         Right,
         Front,
-        Back
+        Back,
+        FrontLeft,
+        FrontRight,
+        BackLeft,
+        BackRight
     }
 }
