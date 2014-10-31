@@ -167,18 +167,18 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         private void ActivateSignalClick(object sender, RoutedEventArgs e)
         {
-            switches["play"].SwitchOn();
+            //switches["play"].SwitchOn();
 
-            // Send pitch as a value from 0 to 127. 
-            float vol = (float) r.NextDouble();
-            float pitch = (float)r.NextDouble() * 127;
+            //// Send pitch as a value from 0 to 127.
+            //float vol = (float) r.NextDouble();
+            //float pitch = (float)r.NextDouble() * 127;
 
-            sliders["volume"].Send(vol);
-            sliders["pitch"].Send(pitch);
+            //sliders["volume"].Send(vol);
+            //sliders["pitch"].Send(pitch);
         }
         private void DeactivateSignalClick(object sender, RoutedEventArgs e)
         {
-            switches["play"].SwitchOff();
+            //switches["play"].SwitchOff();
         }
 
         /// <summary>
