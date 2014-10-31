@@ -405,6 +405,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 {
                     // Selects the first body that is tracked and use that for our calculations
                     Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
+                    if (b == null) return;
 
                     ///////////////////////////////////////////////////////////////////////
                     // Send OSC Triggers
@@ -424,7 +425,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     {
                         partition = 1;
                     }
-                    double stagemidpoint = 2.5;
+                    double stagemidpoint = 2.9;
                     if (spineMidPos.Z > stagemidpoint)
                     {
                         partition += 2; // add 2 to make it the back partition
@@ -456,15 +457,18 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                     // If we detect either a trigger to start or stop the track, change the background color
                     SolidColorBrush color;
-                    if (spineMidPos.Z > 2.5)
-                    {
-                        color = Brushes.DarkBlue;
-                    }
+                    Console.WriteLine(spineMidPos.Z);
+                    
                     // let the triggers overwrite if necessary
                     if (triggerStart || triggerEnd)
                     {
                         color = Brushes.LightGray;
-                    } else 
+                    }
+                    else if (spineMidPos.Z > 2.9)
+                    {
+                        color = Brushes.DarkBlue;
+                    }
+                    else
                     {
                         color = Brushes.Black;
                     }
