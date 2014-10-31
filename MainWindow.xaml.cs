@@ -403,15 +403,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 using (DrawingContext dc = this.drawingGroup.Open())
                 {
-                    // Selects the last body that is tracked and use that for our calculations
-                    Body b = this.bodies[0];
-                    foreach (Body body in this.bodies)
-                    {
-                        if (body.IsTracked)
-                        {
-                            b = body;
-                        }
-                    }
+                    // Selects the first body that is tracked and use that for our calculations
+                    Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
 
                     ///////////////////////////////////////////////////////////////////////
                     // Send OSC Triggers
