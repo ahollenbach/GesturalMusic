@@ -165,20 +165,13 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         string[] instruments;
 
-        private void ActivateSignalClick(object sender, RoutedEventArgs e)
+        private void SetOnePartition(object sender, RoutedEventArgs e)
         {
-            //switches["play"].SwitchOn();
-
-            //// Send pitch as a value from 0 to 127.
-            //float vol = (float) r.NextDouble();
-            //float pitch = (float)r.NextDouble() * 127;
-
-            //sliders["volume"].Send(vol);
-            //sliders["pitch"].Send(pitch);
+            PartitionManager.SetPartitionType(PartitionType.Single);
         }
-        private void DeactivateSignalClick(object sender, RoutedEventArgs e)
+        private void SetFourPartitions(object sender, RoutedEventArgs e)
         {
-            //switches["play"].SwitchOff();
+            PartitionManager.SetPartitionType(PartitionType.Quad);
         }
 
         /// <summary>
@@ -415,25 +408,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
                     CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
 
-                    // set partition
-                    //   3   |  2
-                    //  -----------
-                    //   1   |  0
-                    //    kinect
-                    int partition = 0;
-                    if(spineMidPos.X > 0)
-                    {
-                        partition = 1;
-                    }
-                    if (spineMidPos.Z > KinectStageArea.GetCenterZ())
-                    {
-                        partition += 2; // add 2 to make it the back partition
-                    }
-
                     // trigger start if both left and right hand are open
                     bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
                     // trigger end if both left and right hand are closed and below the Kinect
                     bool triggerEnd = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
+
+                    int partition = PartitionManager.GetPartition(spineMidPos);
 
                     if (triggerStart)
                     {
@@ -453,7 +433,6 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     ///////////////////////////////////////////////////////////////////////
                     // Draw the Screen
                     ///////////////////////////////////////////////////////////////////////
-                    Console.WriteLine(spineMidPos.X + " " + spineMidPos.Z);
 
                     // If we detect either a trigger to start or stop the track, change the background color
                     SolidColorBrush color;                    

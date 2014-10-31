@@ -27,8 +27,8 @@
 
         <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem />
-            <Button x:Name="activateButton" Content="Activate" Width="100" Click="ActivateSignalClick" />
-            <Button x:Name="deactivateButton" Content="Deactivate" Width="100" Click="DeactivateSignalClick" />
+            <Button Content="Single" Width="100" Click="SetOnePartition" />
+            <Button  Content="4 Partitions" Width="100" Click="SetFourPartitions" />
         </StatusBar>
     </Grid>
 </Window>

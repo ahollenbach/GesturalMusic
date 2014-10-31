@@ -8,6 +8,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 {
     class KinectStageArea
     {
+        // All measurements relative to facing the Kinect.
         public static class FRONT_RIGHT 
         {
             public static double X = 1.02;
