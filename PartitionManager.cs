@@ -25,6 +25,22 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             {
                 return 0;
             }
+            else if(currentPartitionType == PartitionType.DoubleLeftRight)
+            {
+                if (spineMidPos.X > 0)
+                {
+                    return 1;
+                }
+                return 0;
+            }
+            else if (currentPartitionType == PartitionType.DoubleFrontBack)
+            {
+                if (spineMidPos.Z > KinectStageArea.GetCenterZ())
+                {
+                    return 1;
+                }
+                return 0;
+            }
             else
             {
                 // set quad partition
@@ -49,14 +65,5 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         {
             currentPartitionType = type;
         }
-    }
-
-    // facing the Kinect
-    enum Partition
-    {
-        FrontLeft,
-        FrontRight,
-        BackLeft,
-        BackRight
     }
 }

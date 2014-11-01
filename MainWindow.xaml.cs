@@ -152,26 +152,25 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// <summary>
         /// A dictionary of Ableton slider controllers.
         /// This will contain elements such as volume and pitch.
-        /// The sliders can be fetched by their name (i.e. "pitch").
+        /// The sliders can be fetched by their name (i.e. "instrument/pitch").
         /// </summary>
         Dictionary<string, AbletonSliderController> sliders;
 
         /// <summary>
         /// A dictionary of Ableton switch controllers.
         /// This will contain elements such as play.
-        /// The sliders can be fetched by their name (i.e. "play").
+        /// The switches can be fetched by their name (i.e. "instrument/play").
         /// </summary>
         Dictionary<string, AbletonSwitchController> switches;
 
         string[] instruments;
 
-        private void SetOnePartition(object sender, RoutedEventArgs e)
+        private void SetNumPartitions(object sender, RoutedEventArgs e)
         {
-            PartitionManager.SetPartitionType(PartitionType.Single);
-        }
-        private void SetFourPartitions(object sender, RoutedEventArgs e)
-        {
-            PartitionManager.SetPartitionType(PartitionType.Quad);
+            if (onePartition.IsChecked.GetValueOrDefault())        PartitionManager.SetPartitionType(PartitionType.Single);
+            else if (twoPartitionLR.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleLeftRight);
+            else if (twoPartitionFB.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleFrontBack);
+            else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
         }
 
         /// <summary>
