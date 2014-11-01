@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ventuz.OSC;
 
-namespace Microsoft.Samples.Kinect.BodyBasics
+namespace GesturalMusic
 {
     /// <summary>
     /// AbletonSliderController is for sending slider-based controls to Ableton (i.e. volume).

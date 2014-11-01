@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ventuz.OSC;
 
-namespace Microsoft.Samples.Kinect.BodyBasics
+namespace GesturalMusic
 {
     /// <summary>
     /// AbletonSwitchController is for setting switches in Ableton (i.e. play/pause). This is for values 

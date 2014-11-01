@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ventuz.OSC;
 
-namespace Microsoft.Samples.Kinect.BodyBasics
+namespace GesturalMusic
 {
     /// <summary>
     /// AbletonController is an abstract parent class for all Ableton control classes. All classes

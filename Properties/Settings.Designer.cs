@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Samples.Kinect.BodyBasics.Properties {
+namespace GesturalMusic.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
