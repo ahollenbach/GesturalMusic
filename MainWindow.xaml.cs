@@ -189,7 +189,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             // Initialize Ableton controllers
             ///////////////////////////////////////////////////////////////////////
             // Instruments
-            instruments = new string[4] { "egypt", "dubstep", "guiro", "house" };
+            instruments = new string[4] { "instr0", "instr1", "instr2", "instr3" };
 
             // Set up the Ableton slider controllers
             sliders = new Dictionary<string,AbletonSliderController>();
@@ -394,112 +394,115 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
             if (dataReceived)
             {
-                using (DrawingContext dc = this.drawingGroup.Open())
-                {
-                    // Selects the first body that is tracked and use that for our calculations
-                    Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
-                    if (b == null) return;
-
-                    ///////////////////////////////////////////////////////////////////////
-                    // Send OSC Triggers
-                    ///////////////////////////////////////////////////////////////////////
-
-                    CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
-                    CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
-                    CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
-
-                    // trigger start if both left and right hand are open
-                    bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
-                    // trigger end if both left and right hand are closed and below the Kinect
-                    bool triggerEnd = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
-
-                    int partition = PartitionManager.GetPartition(spineMidPos);
-
-                    if (triggerStart)
-                    {
-                        switches[instruments[partition] + "/play"].SwitchOn();
-                    }
-                    if (triggerEnd)
-                    {
-                        switches[instruments[partition] + "/play"].SwitchOff();
-                    }
-
-                    if (b.HandLeftState == HandState.Lasso)
-                    {
-                        // Send volume as a value between 0 and 1, only when thumbs up
-                        sliders[instruments[partition] + "/volume"].Send(lHandPos.Y);
-                    }
-
-                    ///////////////////////////////////////////////////////////////////////
-                    // Draw the Screen
-                    ///////////////////////////////////////////////////////////////////////
-
-                    // If we detect either a trigger to start or stop the track, change the background color
-                    SolidColorBrush color;                    
-                    if (triggerStart || triggerEnd)
-                    {
-                        color = Brushes.LightGray;
-                    }
-                    else if (spineMidPos.Z > KinectStageArea.GetCenterZ())
-                    {
-                        color = Brushes.DarkBlue;
-                    }
-                    else
-                    {
-                        color = Brushes.Black;
-                    }
-                    dc.DrawRectangle(color, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-
-                    // Crosshairs so the user can know where positive/negative are for each limb
-                    dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
-                    dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
-
-
-
-                    int penIndex = 0;
-                    foreach (Body body in this.bodies)
-                    {
-                        Pen drawPen = this.bodyColors[penIndex++];
-
-                        if (body.IsTracked)
-                        {
-                            this.DrawClippedEdges(body, dc);
-
-                            IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
-
-                            // convert the joint points to depth (display) space
-                            Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
-
-                            foreach (JointType jointType in joints.Keys)
-                            {
-                                // sometimes the depth(Z) of an inferred joint may show as negative
-                                // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
-                                CameraSpacePoint position = joints[jointType].Position;
-                                if (position.Z < 0)
-                                {
-                                    position.Z = InferredZPositionClamp;
-                                }
-
-                                DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
-                                jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
-                            }
-
-                            this.DrawBody(joints, jointPoints, dc, drawPen);
-
-                            this.DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
-                            this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
-                        }
-                    }
-
-                    // prevent drawing outside of our render area
-                    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                }
+                Update();
             }
         }
 
-        private static float Clamp(float value, float min, float max)
+        private void Update()
         {
-            return (value < min) ? min : (value > max) ? max : value;
+            SolidColorBrush bgColor = SendInstrumentData();
+
+            ///////////////////////////////////////////////////////////////////////
+            // Draw the Screen
+            ///////////////////////////////////////////////////////////////////////
+            using (DrawingContext dc = this.drawingGroup.Open())
+            {
+                dc.DrawRectangle(bgColor, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+
+                // Crosshairs so the user can know where positive/negative are for each limb
+                dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
+                dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
+                
+                int penIndex = 0;
+                foreach (Body body in this.bodies)
+                {
+                    Pen drawPen = this.bodyColors[penIndex++];
+
+                    if (body.IsTracked)
+                    {
+                        this.DrawClippedEdges(body, dc);
+
+                        IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
+
+                        // convert the joint points to depth (display) space
+                        Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
+
+                        foreach (JointType jointType in joints.Keys)
+                        {
+                            // sometimes the depth(Z) of an inferred joint may show as negative
+                            // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
+                            CameraSpacePoint position = joints[jointType].Position;
+                            if (position.Z < 0)
+                            {
+                                position.Z = InferredZPositionClamp;
+                            }
+
+                            DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
+                            jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
+                        }
+
+                        this.DrawBody(joints, jointPoints, dc, drawPen);
+
+                        this.DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
+                        this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
+                    }
+                }
+
+                // prevent drawing outside of our render area
+                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+            }
+        }
+
+        /// <summary>
+        /// Sends OSC messages if applicable
+        /// </summary>
+        /// <returns>The color the background should display (for user feedback)</returns>
+        private SolidColorBrush SendInstrumentData()
+        {
+            // Selects the first body that is tracked and use that for our calculations
+            Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
+            if (b == null) return Brushes.Black;
+
+            CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
+            CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
+            CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
+
+            // trigger start if both left and right hand are open
+            bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
+            // trigger end if both left and right hand are closed and below the Kinect
+            bool triggerEnd = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
+
+            int partition = PartitionManager.GetPartition(spineMidPos);
+
+            if (triggerStart)
+            {
+                switches[instruments[partition] + "/play"].SwitchOn();
+            }
+            else if (triggerEnd)
+            {
+                switches[instruments[partition] + "/play"].SwitchOff();
+            }
+
+            if (b.HandLeftState == HandState.Lasso)
+            {
+                // Send volume as a value between 0 and 1, only when thumbs up
+                sliders[instruments[partition] + "/volume"].Send(lHandPos.Y);
+            }
+
+            // TODO: Move this from this function
+            // If we detect either a trigger to start or stop the track, change the background color
+            if (triggerStart || triggerEnd)
+            {
+                return Brushes.LightGray;
+            }
+            else if (spineMidPos.Z > KinectStageArea.GetCenterZ())
+            {
+                return Brushes.DarkGray;
+            }
+            else
+            {
+                return Brushes.Black;
+            }
         }
 
         /// <summary>
