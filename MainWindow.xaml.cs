@@ -159,12 +159,19 @@
 
         string[] instruments;
 
+        /// <summary>
+        /// Set the number of partitions 
+        /// 
+        /// </summary>
+        /// 
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
         private void SetNumPartitions(object sender, RoutedEventArgs e)
         {
-            if (onePartition.IsChecked.GetValueOrDefault())        PartitionManager.SetPartitionType(PartitionType.Single);
+            if (onePartition.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.Single);
             else if (twoPartitionLR.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleLeftRight);
             else if (twoPartitionFB.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleFrontBack);
-            else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
+            else if (quadPartition.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.Quad);
         }
 
         /// <summary>
@@ -172,6 +179,10 @@
         /// </summary>
         public MainWindow()
         {
+            // Get the reference time
+            DateTime startTime = DateTime.Now;
+
+
             ///////////////////////////////////////////////////////////////////////
             // Set up OSC
             ///////////////////////////////////////////////////////////////////////
@@ -185,7 +196,7 @@
             instruments = new string[4] { "instr0", "instr1", "instr2", "instr3" };
 
             // Set up the Ableton slider controllers
-            sliders = new Dictionary<string,AbletonSliderController>();
+            sliders = new Dictionary<string, AbletonSliderController>();
             switches = new Dictionary<string, AbletonSwitchController>();
 
             for (int i = 0; i < instruments.Length; i++)
@@ -336,6 +347,7 @@
             {
                 this.bodyFrameReader.FrameArrived += this.Reader_FrameArrived;
             }
+
         }
 
         /// <summary>
@@ -385,14 +397,18 @@
                 }
             }
 
+
             if (dataReceived)
             {
+                //Update(startTime);
                 Update();
             }
         }
 
         private void Update()
+        //private void Update(DateTime startTime)
         {
+            //SolidColorBrush bgColor = SendInstrumentData(startTime);
             SolidColorBrush bgColor = SendInstrumentData();
 
             ///////////////////////////////////////////////////////////////////////
@@ -405,7 +421,7 @@
                 // Crosshairs so the user can know where positive/negative are for each limb
                 dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
                 dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
-                
+
                 int penIndex = 0;
                 foreach (Body body in this.bodies)
                 {
@@ -446,11 +462,13 @@
             }
         }
 
+
         /// <summary>
         /// Sends OSC messages if applicable
         /// </summary>
         /// <returns>The color the background should display (for user feedback)</returns>
         private SolidColorBrush SendInstrumentData()
+        //private SolidColorBrush SendInstrumentData(DateTime startTime)
         {
             // Selects the first body that is tracked and use that for our calculations
             Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
@@ -459,6 +477,102 @@
             CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
             CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
             CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
+
+            // Write current joint data to a file
+            System.IO.StreamWriter file = new System.IO.StreamWriter("jointOutput.txt", true);
+
+            ///////////////////////////////////////////////
+            //      Trying to iterate. Can't run program to find how to do that :|
+            //
+            ///////////////////////////////////////////////
+
+
+            //foreach (Joint joint in b.Joints)
+
+            //for( int i=0; i < b.Joints.Count; i++)
+            //{
+            //   Joint joint = b.Joints[i];
+            //}
+
+
+            TimeSpan currentTime = DateTime.Now - startTime;
+
+            Joint joint = b.Joints[JointType.AnkleLeft];
+
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.AnkleRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.ElbowLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.ElbowRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.FootLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.FootRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.HandLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.HandRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.HandTipLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.HandTipRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.Head];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.HipLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.HipRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.KneeLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.KneeRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.Neck];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.ShoulderLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.SpineBase];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.SpineMid];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.SpineShoulder];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.ThumbLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.ThumbRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.WristLeft];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            joint = b.Joints[JointType.WristRight];
+            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
+
+            file.Close();
+
+
 
             // trigger start if both left and right hand are open
             bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
