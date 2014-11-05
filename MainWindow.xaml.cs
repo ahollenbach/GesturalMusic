@@ -141,6 +141,7 @@
         private UdpWriter osc;
         private UdpWriter oscLocal;
         Random r = new Random();
+        private DateTime startTime;
 
 
         /// <summary>
@@ -168,10 +169,10 @@
         /// <param name="e">event arguments</param>
         private void SetNumPartitions(object sender, RoutedEventArgs e)
         {
-            if (onePartition.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.Single);
+            if (onePartition.IsChecked.GetValueOrDefault())        PartitionManager.SetPartitionType(PartitionType.Single);
             else if (twoPartitionLR.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleLeftRight);
             else if (twoPartitionFB.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleFrontBack);
-            else if (quadPartition.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.Quad);
+            else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
         }
 
         /// <summary>
@@ -180,8 +181,7 @@
         public MainWindow()
         {
             // Get the reference time
-            DateTime startTime = DateTime.Now;
-
+            startTime = DateTime.Now;
 
             ///////////////////////////////////////////////////////////////////////
             // Set up OSC
@@ -397,18 +397,14 @@
                 }
             }
 
-
             if (dataReceived)
             {
-                //Update(startTime);
                 Update();
             }
         }
 
         private void Update()
-        //private void Update(DateTime startTime)
         {
-            //SolidColorBrush bgColor = SendInstrumentData(startTime);
             SolidColorBrush bgColor = SendInstrumentData();
 
             ///////////////////////////////////////////////////////////////////////
@@ -468,111 +464,17 @@
         /// </summary>
         /// <returns>The color the background should display (for user feedback)</returns>
         private SolidColorBrush SendInstrumentData()
-        //private SolidColorBrush SendInstrumentData(DateTime startTime)
         {
             // Selects the first body that is tracked and use that for our calculations
             Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
             if (b == null) return Brushes.Black;
 
+            // Send joint data to animators, write to a file
+            sendJointData(b, true);
+
             CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
             CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
             CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
-
-            // Write current joint data to a file
-            System.IO.StreamWriter file = new System.IO.StreamWriter("jointOutput.txt", true);
-
-            ///////////////////////////////////////////////
-            //      Trying to iterate. Can't run program to find how to do that :|
-            //
-            ///////////////////////////////////////////////
-
-
-            //foreach (Joint joint in b.Joints)
-
-            //for( int i=0; i < b.Joints.Count; i++)
-            //{
-            //   Joint joint = b.Joints[i];
-            //}
-
-
-            TimeSpan currentTime = DateTime.Now - startTime;
-
-            Joint joint = b.Joints[JointType.AnkleLeft];
-
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.AnkleRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.ElbowLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.ElbowRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.FootLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.FootRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.HandLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.HandRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.HandTipLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.HandTipRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.Head];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.HipLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.HipRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.KneeLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.KneeRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.Neck];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.ShoulderLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.SpineBase];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.SpineMid];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.SpineShoulder];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.ThumbLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.ThumbRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.WristLeft];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            joint = b.Joints[JointType.WristRight];
-            file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + currentTime.Milliseconds.ToString() + "\n");
-
-            file.Close();
-
-
 
             // trigger start if both left and right hand are open
             bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
@@ -610,6 +512,28 @@
             {
                 return Brushes.Black;
             }
+        }
+
+        /// <summary>
+        /// Sends joint data to the animators. If the boolean writeToFile is set, it will
+        /// generate a file locally of animation data.
+        /// TODO: This method only writes to file and does not send over OSC
+        /// </summary>
+        /// <param name="body">The body of joints to send</param>
+        /// <param name="writeToFile">If we should write to a file (currently ignored)</param>
+        private void sendJointData(Body body, bool writeToFile)
+        {
+            System.IO.StreamWriter file = new System.IO.StreamWriter("jointOutput.csv", true);
+
+            TimeSpan elapsedTime = DateTime.Now - startTime;
+
+            foreach (JointType jointType in Enum.GetValues(typeof(JointType)))
+            {
+                Joint joint = body.Joints[jointType];
+                file.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + elapsedTime.Milliseconds.ToString() + "\n");
+            }
+
+            file.Close();
         }
 
         /// <summary>
