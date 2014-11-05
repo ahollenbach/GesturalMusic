@@ -208,8 +208,6 @@
             ///////////////////////////////////////////////////////////////////////
             // Initialize Kinect
             ///////////////////////////////////////////////////////////////////////
-
-            // one sensor is currently supported
             try
             {
                 this.kinectSensor = KinectSensor.GetDefault();
@@ -318,31 +316,6 @@
             get
             {
                 return this.imageSource;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the current status text to display
-        /// </summary>
-        public string StatusText
-        {
-            get
-            {
-                return this.statusText;
-            }
-
-            set
-            {
-                if (this.statusText != value)
-                {
-                    this.statusText = value;
-
-                    // notify any bound elements that the text has changed
-                    if (this.PropertyChanged != null)
-                    {
-                        this.PropertyChanged(this, new PropertyChangedEventArgs("StatusText"));
-                    }
-                }
             }
         }
 
@@ -679,18 +652,6 @@
                     null,
                     new Rect(this.displayWidth - ClipBoundsThickness, 0, ClipBoundsThickness, this.displayHeight));
             }
-        }
-
-        /// <summary>
-        /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
-        {
-            // on failure, set the status text
-            this.StatusText = this.kinectSensor.IsAvailable ? Properties.Resources.RunningStatusText
-                                                            : Properties.Resources.SensorNotAvailableStatusText;
         }
     }
 }
