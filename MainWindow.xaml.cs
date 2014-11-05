@@ -210,89 +210,99 @@
             ///////////////////////////////////////////////////////////////////////
 
             // one sensor is currently supported
-            this.kinectSensor = KinectSensor.GetDefault();
+            try
+            {
+                this.kinectSensor = KinectSensor.GetDefault();
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.StackTrace);
+            }
 
-            // get the coordinate mapper
-            this.coordinateMapper = this.kinectSensor.CoordinateMapper;
+            if (this.kinectSensor != null)
+            {
+                // get the coordinate mapper
+                this.coordinateMapper = this.kinectSensor.CoordinateMapper;
 
-            // get the depth (display) extents
-            FrameDescription frameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
+                // get the depth (display) extents
+                FrameDescription frameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
 
-            // get size of joint space
-            this.displayWidth = frameDescription.Width;
-            this.displayHeight = frameDescription.Height;
+                // get size of joint space
+                this.displayWidth = frameDescription.Width;
+                this.displayHeight = frameDescription.Height;
 
-            // open the reader for the body frames
-            this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
+                // open the reader for the body frames
+                this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
 
-            // a bone defined as a line between two joints
-            this.bones = new List<Tuple<JointType, JointType>>();
+                // a bone defined as a line between two joints
+                this.bones = new List<Tuple<JointType, JointType>>();
 
-            // Torso
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.Head, JointType.Neck));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.Neck, JointType.SpineShoulder));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.SpineMid));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineMid, JointType.SpineBase));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipLeft));
+                // Torso
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.Head, JointType.Neck));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.Neck, JointType.SpineShoulder));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.SpineMid));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineMid, JointType.SpineBase));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipLeft));
 
-            // Right Arm
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.HandRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight));
+                // Right Arm
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.HandRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight));
 
-            // Left Arm
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.ShoulderLeft, JointType.ElbowLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.ElbowLeft, JointType.WristLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.HandLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.HandLeft, JointType.HandTipLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.ThumbLeft));
+                // Left Arm
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.ShoulderLeft, JointType.ElbowLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.ElbowLeft, JointType.WristLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.HandLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.HandLeft, JointType.HandTipLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.ThumbLeft));
 
-            // Right Leg
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.HipRight, JointType.KneeRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.KneeRight, JointType.AnkleRight));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.AnkleRight, JointType.FootRight));
+                // Right Leg
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.HipRight, JointType.KneeRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.KneeRight, JointType.AnkleRight));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.AnkleRight, JointType.FootRight));
 
-            // Left Leg
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft));
-            this.bones.Add(new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft));
+                // Left Leg
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft));
+                this.bones.Add(new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft));
 
-            // populate body colors, one for each BodyIndex
-            this.bodyColors = new List<Pen>();
+                // populate body colors, one for each BodyIndex
+                this.bodyColors = new List<Pen>();
 
-            this.bodyColors.Add(new Pen(Brushes.Red, 6));
-            this.bodyColors.Add(new Pen(Brushes.Orange, 6));
-            this.bodyColors.Add(new Pen(Brushes.Green, 6));
-            this.bodyColors.Add(new Pen(Brushes.Blue, 6));
-            this.bodyColors.Add(new Pen(Brushes.Indigo, 6));
-            this.bodyColors.Add(new Pen(Brushes.Violet, 6));
+                this.bodyColors.Add(new Pen(Brushes.Red, 6));
+                this.bodyColors.Add(new Pen(Brushes.Orange, 6));
+                this.bodyColors.Add(new Pen(Brushes.Green, 6));
+                this.bodyColors.Add(new Pen(Brushes.Blue, 6));
+                this.bodyColors.Add(new Pen(Brushes.Indigo, 6));
+                this.bodyColors.Add(new Pen(Brushes.Violet, 6));
 
-            // set IsAvailableChanged event notifier
-            this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
+                // set IsAvailableChanged event notifier
+                this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
 
-            // open the sensor
-            this.kinectSensor.Open();
+                // open the sensor
+                this.kinectSensor.Open();
 
-            // set the status text
-            this.StatusText = this.kinectSensor.IsAvailable ? Properties.Resources.RunningStatusText
-                                                            : Properties.Resources.NoSensorStatusText;
+                // set the status text
+                this.StatusText = this.kinectSensor.IsAvailable ? Properties.Resources.RunningStatusText
+                                                                : Properties.Resources.NoSensorStatusText;
 
-            // Create the drawing group we'll use for drawing
-            this.drawingGroup = new DrawingGroup();
+                // Create the drawing group we'll use for drawing
+                this.drawingGroup = new DrawingGroup();
 
-            // Create an image source that we can use in our image control
-            this.imageSource = new DrawingImage(this.drawingGroup);
+                // Create an image source that we can use in our image control
+                this.imageSource = new DrawingImage(this.drawingGroup);
 
-            // use the window object as the view model in this simple example
-            this.DataContext = this;
+                // use the window object as the view model in this simple example
+                this.DataContext = this;
 
-            // initialize the components (controls) of the window
-            this.InitializeComponent();
+                // initialize the components (controls) of the window
+                this.InitializeComponent();
+            }
         }
 
         /// <summary>
