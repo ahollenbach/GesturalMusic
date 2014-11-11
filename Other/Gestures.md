@@ -1,18 +1,14 @@
 ## 0 - MIDI Pitched instrument/“soprano”
 
 ### RightHand 
-RH open below mid point, sends noteOn message to Ableton
+**noteOn message** Send a noteOn message when the velocity switches directions. Previous velocity can also be used for noteVelocity.
 
-RH open above mid point, sends noteOff message to Ableton
-
-(I like the idea of tapping a hot stove or touching the keys on the piano)
-
-RH below mid point, x y & z directions all map to different filter envelopes
+Note length, filters, etc. based on where you do it: x y & z directions all map to different filter envelopes.
 
 It’d be cool if the effect ended up looking like stirring a pot of funky sounds
 
 ### LeftHand
-Pitch - (x-axis/body relative)
+Pitch - (x-axis/body relative: shoulder to arm fully extended, y controls octave)
 
 Open palm - white piano keys (c, d, e, f, g, a, b)
 
@@ -20,7 +16,7 @@ Fist - black piano keys (c#, eb, f#, g#, bb)
 
 3 octaves?
 
-Volume - pointer/middle finger (y-axis, relative to mid point/OR point that feels comfortable? how customizable is that?)
+Global volume: control with 2 fingers out (lasso) on the y-axis
 
 ## 1 - BEATS
 
