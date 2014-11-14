@@ -24,15 +24,11 @@
 
 ## Partition 1: BEATS
 
-### RightHand
-RH open below mid point, sends message to activate drum
+To control the beats, there would be 6 presets:
 
-visually like hitting a literal drum
+L/R up, L/R mid, L/R low: activate when velocity changes from outwards to inwards
 
-### LeftHand
-Toggles between drum instruments? (Kick, hi hat, snare, etc)
-
-I would LOVE IT if this could be a LeftHand punch to the side, or maybe a swing of the left arm?
+Swiping with right hand lasso switches between sets of 6 presets
 
 ## Partition 2: BASS MIDI Pitched instrument
 
