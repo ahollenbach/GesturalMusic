@@ -38,25 +38,23 @@ namespace GesturalMusic
         /// <summary>
         /// Sends a signal with the given value.
         /// </summary>
-        /// <param name="value">The value to send.</param>
+        /// <param name="value">The value to send. Should be between 0 and 1. The controller will handle scaling.</param>
         public override void Send(float value)
         {
-            OscElement elem;
-            value = Clamp(value);
+            //value = ScaleValue(value);
 
-            // If not contiguous, convert all values to discrete integer steps
-            if (!contiguous)
-            {
-                value = (float) Math.Floor(value);
+            // be double sure that it's right
+            //value = Clamp(value);
 
-                Console.WriteLine(this.controlName + ": " + value);
-                elem = new OscElement(controlName, (int) value);
-                osc.Send(elem);
-                return;
-            }
+            // convert it back to 0 to 1 for Ableton.
+            //value = Scale0To1(value);
+            
+            // The reason we do this scale up, clamp, scale down is because
+            // we want our 0 to 1 values to correspond to integer values in Ableton.
+            // It's a little goofy and probably should be fixed in the Max Patch...
 
             Console.WriteLine(this.controlName + ": " + value);
-            elem = new OscElement(controlName, value);
+            OscElement elem = new OscElement(controlName, value);
             osc.Send(elem);
         }
 
@@ -69,6 +67,21 @@ namespace GesturalMusic
         private float Clamp(float value)
         {
             return (value < min) ? min : (value > max) ? max : value;
+        }
+
+        private float ScaleValue(float value)
+        {
+            return value * this.max + this.min;
+        }
+
+        private float Scale0To1(float value)
+        {
+            // If not contiguous, convert all values to discrete integer steps
+            if (!contiguous)
+            {
+                value = (float)Math.Floor(value);
+            }
+            return (value - min) / max;
         }
     }
 }

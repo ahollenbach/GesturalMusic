@@ -75,6 +75,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Instrument.cs" />
     <Compile Include="KinectStageArea.cs" />
     <Compile Include="PartitionManager.cs" />
     <Page Include="MainWindow.xaml">

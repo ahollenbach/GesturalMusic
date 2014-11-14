@@ -128,12 +128,12 @@
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.113.232";
+        private String oscHost = "129.21.112.176";
 
         /// <summary>
         /// The port to send to: default 9001
         /// </summary>
-        private int oscPort = 9001;
+        private int oscPort = 2345;
 
         /// <summary>
         /// Current status text to display
@@ -159,7 +159,7 @@
         /// </summary>
         Dictionary<string, AbletonSwitchController> switches;
 
-        string[] instruments;
+        Instrument[] instruments;
 
         /// <summary>
         /// Set the number of partitions 
@@ -189,13 +189,13 @@
             // Set up OSC
             ///////////////////////////////////////////////////////////////////////
             osc = new UdpWriter(oscHost, oscPort);
-            oscLocal = new UdpWriter("127.0.0.1", 9001);
+            oscLocal = new UdpWriter("127.0.0.1", 22345);
 
             ///////////////////////////////////////////////////////////////////////
             // Initialize Ableton controllers
             ///////////////////////////////////////////////////////////////////////
             // Instruments
-            instruments = new string[4] { "instr0", "instr1", "instr2", "instr3" };
+            instruments = new Instrument[4];
 
             // Set up the Ableton slider controllers
             sliders = new Dictionary<string, AbletonSliderController>();
@@ -203,9 +203,9 @@
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                sliders.Add(instruments[i] + "/volume", new AbletonSliderController(oscLocal, instruments[i] + "/volume", 0, 1, true));
-                switches.Add(instruments[i] + "/play", new AbletonSwitchController(oscLocal, instruments[i] + "/play"));
+                instruments[i] = new Instrument(oscLocal, "instr" + i);
             }
+
 
             ///////////////////////////////////////////////////////////////////////
             // Initialize Kinect
@@ -435,13 +435,12 @@
         {
             // Selects the first body that is tracked and use that for our calculations
             Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
-            Console.WriteLine(b != null);
             if (b == null) return Brushes.Black;
 
             // Send joint data to animators, write to a file
             if (b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open)
             {
-                sendJointData(b, true);
+                // sendJointData(b, true);
             }
 
             CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
@@ -455,26 +454,41 @@
 
             int partition = PartitionManager.GetPartition(spineMidPos);
 
-            if (triggerStart)
-            {
-                switches[instruments[partition] + "/play"].SwitchOn();
-            }
-            else if (triggerEnd)
-            {
-                switches[instruments[partition] + "/play"].SwitchOff();
-            }
-
             if (b.HandLeftState == HandState.Lasso)
             {
                 // Send volume as a value between 0 and 1, only when thumbs up
-                sliders[instruments[partition] + "/volume"].Send(lHandPos.Y);
+                //sliders[instruments[partition] + "/volume"].Send(lHandPos.Y);
             }
+
+            // We're trying to play a MIDI instrument
+            if (b.HandRightState == HandState.Closed)
+            {
+                float armLength = Length(b.Joints[JointType.ShoulderLeft], b.Joints[JointType.ElbowLeft]) +
+                                  Length(b.Joints[JointType.ElbowLeft], b.Joints[JointType.WristLeft]);
+
+                float min = b.Joints[JointType.ShoulderLeft].Position.X - armLength;
+                float max = b.Joints[JointType.ShoulderLeft].Position.X;
+                float pos = b.Joints[JointType.WristLeft].Position.X;
+
+                float pitch = (pos - min) / (max - min);
+                //float octave = 5 * 12;
+                //pitch = (float) Math.Floor(pitch * 12);
+
+                instruments[partition].PlayNote(pitch, 0.5f,b.HandLeftState == HandState.Open ? "white" : "black");
+                //instruments[partition].PlayNote(0.5f,0.5f);
+            }
+            else if (b.HandRightState == HandState.Open)
+            {
+                instruments[partition].StopNote();
+            }
+
+
 
             // TODO: Move this from this function
             // If we detect either a trigger to start or stop the track, change the background color
-            if (triggerStart || triggerEnd)
+            if (b.HandRightState == HandState.Closed && b.HandLeftState == HandState.Open)
             {
-                return Brushes.LightGray;
+                return Brushes.DarkGray;
             }
             else if (spineMidPos.Z > KinectStageArea.GetCenterZ())
             {
@@ -484,6 +498,20 @@
             {
                 return Brushes.Black;
             }
+        }
+
+        public static float Length(Joint p1, Joint p2)
+        {
+            return (float) Math.Sqrt(
+                Math.Pow(p1.Position.X - p2.Position.X, 2) +
+                Math.Pow(p1.Position.Y - p2.Position.Y, 2) +
+                Math.Pow(p1.Position.Z - p2.Position.Z, 2));
+        }
+        public static float Length(DepthSpacePoint p1, DepthSpacePoint p2)
+        {
+            return (float)Math.Sqrt(
+                Math.Pow(p1.X - p2.X, 2) +
+                Math.Pow(p1.Y - p2.Y, 2));
         }
 
         /// <summary>
@@ -540,6 +568,30 @@
                     drawingContext.DrawEllipse(drawBrush, null, jointPoints[jointType], JointThickness, JointThickness);
                 }
             }
+
+            DepthSpacePoint sl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ShoulderLeft].Position);
+            DepthSpacePoint el = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ElbowLeft].Position);
+            DepthSpacePoint wl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.WristLeft].Position);
+
+            float armLength = Length(sl, el) + Length(el, wl);
+
+            float min = sl.X - armLength;
+            float max = sl.X;
+            float pos = wl.X;
+
+            Pen guidePen = new Pen(Brushes.Wheat, 2);
+            int guideHeight = 14;
+            double[] guideLinesX = new double[] { 1, 0.91, 0.75, 0.58, 0.41, 0.24, 0.08 };
+            for (int i = 0; i < guideLinesX.Length; i++)
+            {
+                drawingContext.DrawLine(guidePen, new Point(sl.X - armLength * guideLinesX[i], sl.Y - guideHeight / 2), new Point(sl.X - armLength * guideLinesX[i], sl.Y + guideHeight / 2));
+            }
+            drawingContext.DrawLine(guidePen, new Point(sl.X, sl.Y), new Point(sl.X - armLength, sl.Y));
+
+
+
+            drawingContext.DrawLine(new Pen(Brushes.Chartreuse, 1), new Point(wl.X, wl.Y + 30), new Point(wl.X, wl.Y - 30));
+
         }
 
         /// <summary>
