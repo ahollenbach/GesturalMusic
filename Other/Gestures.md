@@ -1,39 +1,44 @@
-## 0 - MIDI Pitched instrument/“soprano”
+## Partition 0: MIDI Pitched instrument/“soprano”
 
 ### RightHand 
-**noteOn message** Send a noteOn message when the velocity switches directions. Previous velocity can also be used for noteVelocity.
+**noteOn** - Send a noteOn message when the velocity switches directions. 
 
-Note length, filters, etc. based on where you do it: x y & z directions all map to different filter envelopes.
+**velocity** - Previous velocity can be used for noteVelocity.
 
-It’d be cool if the effect ended up looking like stirring a pot of funky sounds
+**Note length, filters, etc.** - based on where you do it: x y & z directions all map to different filter envelopes.
+
+*It’d be cool if the effect ended up looking like stirring a pot of funky sounds*
 
 ### LeftHand
-Pitch - (x-axis/body relative: shoulder to arm fully extended, y controls octave)
+**pitch: semitones** - x-axis/body relative: shoulder to arm fully extended
 
-Open palm - white piano keys (c, d, e, f, g, a, b)
+**pitch: octaves** - three octaves, controlled by y-axis. Above/around head is upper octave, middle octave is shoulder height, lower octave is chest area.
 
-Fist - black piano keys (c#, eb, f#, g#, bb)
+**Playing specific notes**
 
-3 octaves?
+>*White piano keys (c, d, e, f, g, a, b)* - Open palm, facing camera (custom detection code required)
 
-Global volume: control with 2 fingers out (lasso) on the y-axis
+>*Black piano keys (c#, eb, f#, g#, bb)* - Closed fist
 
-## 1 - BEATS
+**Global volume** - Control with 2 fingers out (lasso) on the y-axis
+
+## Partition 1: BEATS
 
 ### RightHand
 RH open below mid point, sends message to activate drum
 
 visually like hitting a literal drum
+
 ### LeftHand
 Toggles between drum instruments? (Kick, hi hat, snare, etc)
 
 I would LOVE IT if this could be a LeftHand punch to the side, or maybe a swing of the left arm?
 
-## 2 - BASS MIDI Pitched instrument
+## Partition 2: BASS MIDI Pitched instrument
 
-Same controls as the 0 quadrant, but using a different instrument track in Ableton
+Same controls as the 0th partition, but using a different instrument track in Ableton
 
-## 3 GRANULATOR
+## Partition 3: GRANULATOR
 
 This is my greatest dream: 
 
