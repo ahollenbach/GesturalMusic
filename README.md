@@ -9,7 +9,7 @@ Making music with the body, using the Kinect 2.
 This project requires the following:
 
 - Windows 8, Windows 8.1, or Windows Embedded Standard 8
-- Kinect for Windows SDK 2.0 Public Preview (http://www.microsoft.com/en-us/download/details.aspx?id=43661)
+- Kinect for Windows SDK 2.0 Public Preview (http://www.microsoft.com/en-us/kinectforwindows/develop/)
 - Visual Studio (tested on 2012,2013)
 - Ableton Live (tested on Live 9)
 - Max for Live
