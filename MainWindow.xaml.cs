@@ -12,6 +12,7 @@
     using Microsoft.Kinect;
     using Ventuz.OSC;
     using System.Windows.Controls;
+    using System.Windows.Media.Media3D;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -525,10 +526,15 @@
         {
             TimeSpan elapsedTime = DateTime.Now - startTime;
 
+            IReadOnlyDictionary<JointType,JointOrientation> jointOrientations = body.JointOrientations;
             foreach (JointType jointType in Enum.GetValues(typeof(JointType)))
             {
                 Joint joint = body.Joints[jointType];
-                jointDataFile.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + elapsedTime.TotalMilliseconds);
+                Vector4 vec = jointOrientations[jointType].Orientation;
+
+                jointDataFile.WriteLine(joint.JointType + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z + "," + 
+                                                                vec.W + "," + vec.X + "," + vec.Y + "," + vec.Z + "," + 
+                                                                elapsedTime.TotalMilliseconds);
             }
         }
 
