@@ -129,12 +129,12 @@
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.112.176";
+        private String oscHost = "129.21.112.170";
 
         /// <summary>
         /// The port to send to: default 9001
         /// </summary>
-        private int oscPort = 2345;
+        private int oscPort = 22345;
 
         /// <summary>
         /// Current status text to display
@@ -204,7 +204,7 @@
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                instruments[i] = new Instrument(oscLocal, "instr" + i);
+                instruments[i] = new Instrument(osc, "instr" + i);
             }
 
 
@@ -384,8 +384,8 @@
                 dc.DrawRectangle(bgColor, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                 // Crosshairs so the user can know where positive/negative are for each limb
-                dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
-                dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
+                // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
+                // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
 
                 int penIndex = 0;
                 foreach (Body body in this.bodies)
@@ -471,12 +471,20 @@
                 float max = b.Joints[JointType.ShoulderLeft].Position.X;
                 float pos = b.Joints[JointType.WristLeft].Position.X;
 
-                float pitch = (pos - min) / (max - min);
-                //float octave = 5 * 12;
-                //pitch = (float) Math.Floor(pitch * 12);
+                float pitch = 1-Clamp(0f, .8f, 1-(pos - min) / (max - min));
 
-                instruments[partition].PlayNote(pitch, 0.5f,b.HandLeftState == HandState.Open ? "white" : "black");
-                //instruments[partition].PlayNote(0.5f,0.5f);
+                float baseOctave = 4;
+                float userOctave = 0;
+                if (b.Joints[JointType.WristLeft].Position.Y > b.Joints[JointType.SpineShoulder].Position.Y)
+                {
+                    userOctave = 2;
+                }
+                else if (b.Joints[JointType.WristLeft].Position.Y > b.Joints[JointType.SpineMid].Position.Y)
+                {
+                    userOctave = 1;
+                }
+                float octave = (userOctave + baseOctave) * 12;
+                instruments[partition].PlayNote(pitch, 0.5f, octave, b.HandLeftState == HandState.Open ? "white" : "black");
             }
             else if (b.HandRightState == HandState.Open)
             {
@@ -499,6 +507,11 @@
             {
                 return Brushes.Black;
             }
+        }
+
+        private float Clamp(float min, float max, float value)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
         }
 
         public static float Length(Joint p1, Joint p2)

@@ -11,10 +11,13 @@ namespace GesturalMusic
     {
         private string name;
         private UdpWriter osc;
+
+        private AbletonSliderController octave;
         private AbletonSliderController pitch;
         private AbletonSliderController velocity;
         private AbletonSwitchController noteOn;
 
+        private AbletonSliderController octaveBlack;
         private AbletonSliderController pitchBlack;
         private AbletonSliderController velocityBlack;
         private AbletonSwitchController noteOnBlack;
@@ -29,10 +32,12 @@ namespace GesturalMusic
             this.name = name;
             this.osc = osc;
 
-            pitch    = new AbletonSliderController(osc, this.name + "/pitch/white", 0, 127, false);
+            octave = new AbletonSliderController(osc, this.name + "/octave/white", 0, 127, false);
+            pitch = new AbletonSliderController(osc, this.name + "/pitch/white", 0, 127, false);
             velocity = new AbletonSliderController(osc, this.name + "/velocity/white", 0, 127, false);
             noteOn = new AbletonSwitchController(osc, this.name + "/noteOn/white");
 
+            octaveBlack = new AbletonSliderController(osc, this.name + "/octave/black", 0, 127, false);
             pitchBlack = new AbletonSliderController(osc, this.name + "/pitch/black", 0, 127, false);
             velocityBlack = new AbletonSliderController(osc, this.name + "/velocity/black", 0, 127, false);
             noteOnBlack = new AbletonSwitchController(osc, this.name + "/noteOn/black");
@@ -42,19 +47,21 @@ namespace GesturalMusic
             playing = false;
         }
 
-        public void PlayNote(float pitchVal, float velocityVal, string color) {
+        public void PlayNote(float pitchVal, float velocityVal, float octaveVal, string color) {
             // rate limit as to note overwhelm Ableton
             if (lastNotedPlayed + lastDuration <= DateTime.Now)
             {
                 Console.WriteLine(lastNotedPlayed);
                 if (color == "black")
                 {
+                    octaveBlack.Send(octaveVal);
                     pitchBlack.Send(pitchVal);
                     velocityBlack.Send(velocityVal);
                     noteOnBlack.SwitchOn();
                 }
                 else
                 {
+                    octave.Send(octaveVal);
                     pitch.Send(pitchVal);
                     velocity.Send(velocityVal);
                     noteOn.SwitchOn();
