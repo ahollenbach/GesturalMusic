@@ -374,7 +374,35 @@
 
         private void Update()
         {
-            SolidColorBrush bgColor = SendInstrumentData();
+            SolidColorBrush bgColor;
+
+
+            // Selects the first body that is tracked and use that for our calculations
+            Body body = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
+            if (body != null)
+            {
+                SendInstrumentData(body);
+
+                // Set the background color according to a few things
+
+                // If we detect either a trigger to start or stop the track, change the background color
+                if (body.HandRightState == HandState.Closed && body.HandLeftState == HandState.Open)
+                {
+                    bgColor = Brushes.DarkGray;
+                }
+                else if (body.Joints[JointType.SpineMid].Position.Z > KinectStageArea.GetCenterZ())
+                {
+                    bgColor = Brushes.DarkBlue;
+                }
+                else
+                {
+                    bgColor = Brushes.Black;
+                }
+            }
+            else
+            {
+                bgColor = Brushes.Black;
+            }
 
             ///////////////////////////////////////////////////////////////////////
             // Draw the Screen
@@ -388,15 +416,15 @@
                 // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
 
                 int penIndex = 0;
-                foreach (Body body in this.bodies)
+                foreach (Body b in this.bodies)
                 {
                     Pen drawPen = this.bodyColors[penIndex++];
 
-                    if (body.IsTracked)
+                    if (b.IsTracked)
                     {
-                        this.DrawClippedEdges(body, dc);
+                        this.DrawClippedEdges(b, dc);
 
-                        IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
+                        IReadOnlyDictionary<JointType, Joint> joints = b.Joints;
 
                         // convert the joint points to depth (display) space
                         Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
@@ -417,8 +445,8 @@
 
                         this.DrawBody(joints, jointPoints, dc, drawPen);
 
-                        this.DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
-                        this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
+                        this.DrawHand(b.HandLeftState, jointPoints[JointType.HandLeft], dc);
+                        this.DrawHand(b.HandRightState, jointPoints[JointType.HandRight], dc);
                     }
                 }
 
@@ -432,61 +460,57 @@
         /// Sends OSC messages if applicable
         /// </summary>
         /// <returns>The color the background should display (for user feedback)</returns>
-        private SolidColorBrush SendInstrumentData()
+        private SolidColorBrush SendInstrumentData(Body body)
         {
-            // Selects the first body that is tracked and use that for our calculations
-            Body b = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
-            if (b == null) return Brushes.Black;
-
             // Send joint data to animators, write to a file
-            if (b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open)
+            if (body.HandLeftState == body.HandRightState && body.HandLeftState == HandState.Open)
             {
                 // sendJointData(b, true);
             }
 
-            CameraSpacePoint spineMidPos = b.Joints[JointType.SpineMid].Position;
-            CameraSpacePoint lHandPos = b.Joints[JointType.HandLeft].Position;
-            CameraSpacePoint rHandPos = b.Joints[JointType.HandRight].Position;
+            CameraSpacePoint spineMidPos = body.Joints[JointType.SpineMid].Position;
+            CameraSpacePoint lHandPos = body.Joints[JointType.HandLeft].Position;
+            CameraSpacePoint rHandPos = body.Joints[JointType.HandRight].Position;
 
             // trigger start if both left and right hand are open
-            bool triggerStart = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Open;
+            bool triggerStart = body.HandLeftState == body.HandRightState && body.HandLeftState == HandState.Open;
             // trigger end if both left and right hand are closed and below the Kinect
-            bool triggerEnd = b.HandLeftState == b.HandRightState && b.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
+            bool triggerEnd = body.HandLeftState == body.HandRightState && body.HandLeftState == HandState.Closed && lHandPos.Y < 0 && rHandPos.Y < 0;
 
             int partition = PartitionManager.GetPartition(spineMidPos);
 
-            if (b.HandLeftState == HandState.Lasso)
+            if (body.HandLeftState == HandState.Lasso)
             {
                 // Send volume as a value between 0 and 1, only when thumbs up
                 //sliders[instruments[partition] + "/volume"].Send(lHandPos.Y);
             }
 
             // We're trying to play a MIDI instrument
-            if (b.HandRightState == HandState.Closed)
+            if (body.HandRightState == HandState.Closed)
             {
-                float armLength = Length(b.Joints[JointType.ShoulderLeft], b.Joints[JointType.ElbowLeft]) +
-                                  Length(b.Joints[JointType.ElbowLeft], b.Joints[JointType.WristLeft]);
+                float armLength = Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
+                                  Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
 
-                float min = b.Joints[JointType.ShoulderLeft].Position.X - armLength;
-                float max = b.Joints[JointType.ShoulderLeft].Position.X;
-                float pos = b.Joints[JointType.WristLeft].Position.X;
+                float min = body.Joints[JointType.ShoulderLeft].Position.X - armLength;
+                float max = body.Joints[JointType.ShoulderLeft].Position.X;
+                float pos = body.Joints[JointType.WristLeft].Position.X;
 
                 float pitch = 1-Clamp(0f, .8f, 1-(pos - min) / (max - min));
 
                 float baseOctave = 4;
                 float userOctave = 0;
-                if (b.Joints[JointType.WristLeft].Position.Y > b.Joints[JointType.SpineShoulder].Position.Y)
+                if (body.Joints[JointType.WristLeft].Position.Y > body.Joints[JointType.SpineShoulder].Position.Y)
                 {
                     userOctave = 2;
                 }
-                else if (b.Joints[JointType.WristLeft].Position.Y > b.Joints[JointType.SpineMid].Position.Y)
+                else if (body.Joints[JointType.WristLeft].Position.Y > body.Joints[JointType.SpineMid].Position.Y)
                 {
                     userOctave = 1;
                 }
                 float octave = (userOctave + baseOctave) * 12;
-                instruments[partition].PlayNote(pitch, 0.5f, octave, b.HandLeftState == HandState.Open ? "white" : "black");
+                instruments[partition].PlayNote(pitch, 0.5f, octave, body.HandLeftState == HandState.Open ? "white" : "black");
             }
-            else if (b.HandRightState == HandState.Open)
+            else if (body.HandRightState == HandState.Open)
             {
                 instruments[partition].StopNote();
             }
@@ -495,7 +519,7 @@
 
             // TODO: Move this from this function
             // If we detect either a trigger to start or stop the track, change the background color
-            if (b.HandRightState == HandState.Closed && b.HandLeftState == HandState.Open)
+            if (body.HandRightState == HandState.Closed && body.HandLeftState == HandState.Open)
             {
                 return Brushes.DarkGray;
             }
@@ -535,7 +559,7 @@
         /// </summary>
         /// <param name="body">The body of joints to send</param>
         /// <param name="writeToFile">If we should write to a file (currently ignored)</param>
-        private void sendJointData(Body body, bool writeToFile)
+        private void SendJointData(Body body, bool writeToFile)
         {
             TimeSpan elapsedTime = DateTime.Now - startTime;
 
