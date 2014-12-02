@@ -41,18 +41,6 @@ namespace GesturalMusic
         /// <param name="value">The value to send. Should be between 0 and 1. The controller will handle scaling.</param>
         public override void Send(float value)
         {
-            //value = ScaleValue(value);
-
-            // be double sure that it's right
-            //value = Clamp(value);
-
-            // convert it back to 0 to 1 for Ableton.
-            //value = Scale0To1(value);
-            
-            // The reason we do this scale up, clamp, scale down is because
-            // we want our 0 to 1 values to correspond to integer values in Ableton.
-            // It's a little goofy and probably should be fixed in the Max Patch...
-
             Console.WriteLine(this.controlName + ": " + value);
             OscElement elem = new OscElement(controlName, value);
             osc.Send(elem);

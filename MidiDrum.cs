@@ -7,41 +7,27 @@ using Ventuz.OSC;
 
 namespace GesturalMusic
 {
-    class Instrument
+    class MidiDrum : Instrument
     {
         private string name;
         private UdpWriter osc;
 
-        private AbletonSliderController octave;
         private AbletonSliderController pitch;
         private AbletonSliderController velocity;
         private AbletonSwitchController noteOn;
 
-        private AbletonSliderController octaveBlack;
-        private AbletonSliderController pitchBlack;
-        private AbletonSliderController velocityBlack;
-        private AbletonSwitchController noteOnBlack;
-
         private DateTime lastNotedPlayed;
-        private TimeSpan lastDuration;
-        private static TimeSpan rateLimit = new TimeSpan(0, 0, 0, 0, 100);
+        private static TimeSpan rateLimit = new TimeSpan(0, 0, 0, 0, 50);
 
-        private bool playing;
-
-        public Instrument(UdpWriter osc, string name)
+        public MidiDrum(UdpWriter osc, string name)
         {
+            
             this.name = name;
             this.osc = osc;
 
-            octave = new AbletonSliderController(osc, this.name + "/octave/white", 0, 127, false);
-            pitch = new AbletonSliderController(osc, this.name + "/pitch/white", 0, 127, false);
-            velocity = new AbletonSliderController(osc, this.name + "/velocity/white", 0, 127, false);
-            noteOn = new AbletonSwitchController(osc, this.name + "/noteOn/white");
-
-            octaveBlack = new AbletonSliderController(osc, this.name + "/octave/black", 0, 127, false);
-            pitchBlack = new AbletonSliderController(osc, this.name + "/pitch/black", 0, 127, false);
-            velocityBlack = new AbletonSliderController(osc, this.name + "/velocity/black", 0, 127, false);
-            noteOnBlack = new AbletonSwitchController(osc, this.name + "/noteOn/black");
+            pitch = new AbletonSliderController(osc, this.name + "/pitch", 0, 127, false);
+            velocity = new AbletonSliderController(osc, this.name + "/velocity", 0, 127, false);
+            noteOn = new AbletonSwitchController(osc, this.name + "/noteOn");
 
             lastNotedPlayed = DateTime.Now;
             lastDuration = new TimeSpan(0);
