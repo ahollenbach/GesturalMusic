@@ -88,8 +88,8 @@ namespace GesturalMusic
             // We're trying to play a MIDI instrument
             if (body.HandRightState == HandState.Closed)
             {
-                float armLength = Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
-                                  Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
+                float armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
+                                  Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
 
                 float min = body.Joints[JointType.ShoulderLeft].Position.X - armLength;
                 float max = body.Joints[JointType.ShoulderLeft].Position.X;
@@ -122,13 +122,6 @@ namespace GesturalMusic
             {
                 this.StopNote();
             }
-        }
-        public static float Length(Joint p1, Joint p2)
-        {
-            return (float)Math.Sqrt(
-                Math.Pow(p1.Position.X - p2.Position.X, 2) +
-                Math.Pow(p1.Position.Y - p2.Position.Y, 2) +
-                Math.Pow(p1.Position.Z - p2.Position.Z, 2));
         }
     }
 }
