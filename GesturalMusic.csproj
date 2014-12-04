@@ -79,6 +79,7 @@
     <Compile Include="KinectStageArea.cs" />
     <Compile Include="MidiDrum.cs" />
     <Compile Include="PartitionManager.cs" />
+    <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

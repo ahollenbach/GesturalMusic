@@ -200,7 +200,7 @@
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                instruments[i] = new Instrument(osc, "instr" + i);
+                instruments[i] = new MidiDrum(oscLocal, "instr" + i);
             }
 
 
@@ -482,7 +482,8 @@
             }
 
             // Ask the instrument if it wants to play
-            instruments[partition].CheckAndPlayNote(body);
+            MidiDrum drum = (MidiDrum)instruments[partition];
+            drum.CheckAndPlayNote(body);
         }
 
         /// <summary>
@@ -549,7 +550,7 @@
             DepthSpacePoint el = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ElbowLeft].Position);
             DepthSpacePoint wl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.WristLeft].Position);
 
-            float armLength = Length(sl, el) + Length(el, wl);
+            float armLength = Utils.Length(sl, el) + Utils.Length(el, wl);
 
             float min = sl.X - armLength;
             float max = sl.X;

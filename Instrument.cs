@@ -23,7 +23,7 @@ namespace GesturalMusic
         private AbletonSliderController velocityBlack;
         private AbletonSwitchController noteOnBlack;
 
-        private DateTime lastNotedPlayed;
+        private DateTime lastNotePlayed;
         private TimeSpan lastDuration;
         private static TimeSpan rateLimit = new TimeSpan(0, 0, 0, 0, 100);
 
@@ -44,16 +44,16 @@ namespace GesturalMusic
             velocityBlack = new AbletonSliderController(osc, this.name + "/velocity/black", 0, 127, false);
             noteOnBlack = new AbletonSwitchController(osc, this.name + "/noteOn/black");
 
-            lastNotedPlayed = DateTime.Now;
+            lastNotePlayed = DateTime.Now;
             lastDuration = new TimeSpan(0);
             playing = false;
         }
 
         public void PlayNote(float pitchVal, float velocityVal, float octaveVal, string color) {
             // rate limit as to note overwhelm Ableton
-            if (lastNotedPlayed + lastDuration <= DateTime.Now)
+            if (lastNotePlayed + lastDuration <= DateTime.Now)
             {
-                Console.WriteLine(lastNotedPlayed);
+                Console.WriteLine(lastNotePlayed);
                 if (color == "black")
                 {
                     octaveBlack.Send(octaveVal);
@@ -70,7 +70,7 @@ namespace GesturalMusic
                 }
                 
 
-                lastNotedPlayed = DateTime.Now;
+                lastNotePlayed = DateTime.Now;
                 lastDuration = rateLimit; // TODO: Probably not necessary
                 playing = true;
             }
