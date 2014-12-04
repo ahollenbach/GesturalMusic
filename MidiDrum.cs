@@ -67,7 +67,7 @@ namespace GesturalMusic
             float armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
                                 Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
 
-            float threshold = 0.5f * armLength;         // Don't even look for a hit unless more than half extended
+            float threshold = 0.7f * armLength;         // Don't even look for a hit unless more than threshold out
 
             // Set locations if first time
             if (lWristLocationLast == null || rWristLocationLast == null)
