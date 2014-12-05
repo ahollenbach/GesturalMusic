@@ -377,14 +377,14 @@
             Body body = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
             if (body != null)
             {
-                SendInstrumentData(body);
+                bool played = SendInstrumentData(body);
 
                 // Set the background color according to a few things
 
                 // If we detect either a trigger to start or stop the track, change the background color
-                if (body.HandRightState == HandState.Closed && body.HandLeftState == HandState.Open)
+                if (played)
                 {
-                    bgColor = Brushes.DarkGray;
+                    bgColor = Brushes.LightGray;
                 }
                 else if (body.Joints[JointType.SpineMid].Position.Z > KinectStageArea.GetCenterZ())
                 {
@@ -456,12 +456,12 @@
         /// Sends OSC messages if applicable
         /// </summary>
         /// <returns>The color the background should display (for user feedback)</returns>
-        private void SendInstrumentData(Body body)
+        private bool SendInstrumentData(Body body)
         {
             // Send joint data to animators, write to a file
             if (body.HandLeftState == body.HandRightState && body.HandLeftState == HandState.Open)
             {
-                // sendJointData(b, true);
+                //SendJointData(body, true);
             }
 
             CameraSpacePoint spineMidPos = body.Joints[JointType.SpineMid].Position;
@@ -483,7 +483,11 @@
 
             // Ask the instrument if it wants to play
             MidiDrum drum = (MidiDrum)instruments[partition];
-            drum.CheckAndPlayNote(body);
+            if (drum.CheckAndPlayNote(body))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

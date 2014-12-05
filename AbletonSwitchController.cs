@@ -31,6 +31,7 @@ namespace GesturalMusic
         /// <param name="value">The value to send. Either 0 or 1.</param>
         public override void Send(float value)
         {
+            Console.WriteLine(this.controlName + ": " + value);
             OscElement elem = new OscElement(controlName, value);
             osc.Send(elem);
         }
@@ -41,6 +42,15 @@ namespace GesturalMusic
         public void SwitchOn()
         {
             Send(1.0f);
+        }
+
+        /// <summary>
+        /// Sends a switch on (1) signal to Ableton.
+        /// </summary>
+        public void SwitchOn(bool tru)
+        {
+            Random r = new Random();
+            Send((float) (r.NextDouble() + 0.000001));
         }
 
         /// <summary>
