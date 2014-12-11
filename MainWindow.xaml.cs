@@ -439,6 +439,7 @@
                             jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
                         }
 
+                        this.InstrumentSelect(b, joints, jointPoints, dc);
                         this.DrawBody(joints, jointPoints, dc, drawPen);
 
                         this.DrawHand(b.HandLeftState, jointPoints[JointType.HandLeft], dc);
@@ -513,6 +514,70 @@
             }
         }
 
+
+        /// <summary>
+        /// Select an instrument while coming into a partition
+        /// </summary>
+        /// <param name="joints"></param>
+        /// <param name="jointPoints"></param>
+        /// <param name="drawingContext"></param>
+        private void InstrumentSelect(Body body, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
+        {
+            // Get HandTipLeft and ShoulderLeft positions
+            CameraSpacePoint htLeftc = joints[JointType.HandTipLeft].Position;
+            CameraSpacePoint sLeftc = joints[JointType.ShoulderLeft].Position;
+
+            // Create 3D Vectors for HandTipLeft, ShoulderLeft and a reference point
+            Vector3D hL = new Vector3D(htLeftc.X, htLeftc.Y, htLeftc.Z);
+            Vector3D sL = new Vector3D(sLeftc.X, sLeftc.Y, sLeftc.Z);
+            Vector3D temp = new Vector3D(htLeftc.X, sLeftc.Y, htLeftc.Z);
+
+            // Get the 3D Vectors representing the two lines
+            Vector3D line1 = sL - hL;
+            Vector3D line2 = sL - temp;
+
+            // Get dot product of the two which gives the angle between the lines
+            // double angle = Vector3D.DotProduct(line1, line2);
+
+            // Get the angle between the two lines by using inbuilt Vector3D function
+            double angle2 = Vector3D.AngleBetween(line2, line1);
+            Console.WriteLine(" angle iiiisssssssssssssssssssss theeeeeesss" + angle2);
+
+
+            // If handtip is at the required angle w.r.t the left shoulder
+            // AND HandState is closed
+            // SELECT current option
+
+            // Hand at approx 45 degrees
+            if (angle2 > 40 && angle2 < 50 && body.HandLeftState == HandState.Closed)
+            {
+                drawingContext.DrawEllipse(Brushes.RoyalBlue, new Pen(Brushes.RoyalBlue, 1), new Point(100, 100), 20, 20);
+            }
+            else
+            {
+                drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 100), 20, 20);
+            }
+
+            // Hand at approximately 65 degrees
+            if (angle2 > 60 && angle2 < 70 && body.HandLeftState == HandState.Closed)
+            {
+                drawingContext.DrawEllipse(Brushes.SandyBrown, new Pen(Brushes.SandyBrown, 1), new Point(150, 100), 20, 20);
+            }
+            else
+            {
+                drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(150, 100), 20, 20);
+            }
+
+            // Hand at approximately 25 degrees
+            if (angle2 > 20 && angle2 < 30 && body.HandLeftState == HandState.Closed)
+            {
+                drawingContext.DrawEllipse(Brushes.MistyRose, new Pen(Brushes.MistyRose, 1), new Point(100, 150), 20, 20);
+            }
+            else
+            {
+                drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 150), 20, 20);
+            }
+        }
         /// <summary>
         /// Draws a body
         /// </summary>
@@ -567,11 +632,16 @@
             {
                 drawingContext.DrawLine(guidePen, new Point(sl.X - armLength * guideLinesX[i], sl.Y - guideHeight / 2), new Point(sl.X - armLength * guideLinesX[i], sl.Y + guideHeight / 2));
             }
+
+            // Base horizontal line
             drawingContext.DrawLine(guidePen, new Point(sl.X, sl.Y), new Point(sl.X - armLength, sl.Y));
 
 
-
+            // Line on the hand
             drawingContext.DrawLine(new Pen(Brushes.Chartreuse, 1), new Point(wl.X, wl.Y + 30), new Point(wl.X, wl.Y - 30));
+
+                   
+            
 
         }
 
