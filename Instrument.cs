@@ -47,7 +47,7 @@ namespace GesturalMusic
             lastNotePlayed = DateTime.Now;
             lastDuration = new TimeSpan(0);
             playing = false;
-        }
+        }  
 
         public void PlayNote(float pitchVal, float velocityVal, float octaveVal, string color) {
             // rate limit as to note overwhelm Ableton

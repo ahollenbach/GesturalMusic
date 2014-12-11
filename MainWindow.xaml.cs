@@ -129,7 +129,7 @@
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.112.170";
+        private String oscHost = "129.21.212.195";
 
         /// <summary>
         /// The port to send to: default 9001
@@ -438,8 +438,8 @@
                             DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
                             jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
                         }
-
-                        this.InstrumentSelect(b, joints, jointPoints, dc);
+                                                
+                        this.InstrumentSelect(b, joints, jointPoints, dc, PartitionManager.getCurrentPartitionType() );
                         this.DrawBody(joints, jointPoints, dc, drawPen);
 
                         this.DrawHand(b.HandLeftState, jointPoints[JointType.HandLeft], dc);
@@ -516,13 +516,17 @@
 
 
         /// <summary>
-        /// Select an instrument while coming into a partition
+        /// Set an instrument while coming for the first time into a partition
         /// </summary>
         /// <param name="joints"></param>
         /// <param name="jointPoints"></param>
         /// <param name="drawingContext"></param>
-        private void InstrumentSelect(Body body, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
+        private void InstrumentSelect(Body body, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext, int partitionNumber)
         {
+            
+
+
+
             // Get HandTipLeft and ShoulderLeft positions
             CameraSpacePoint htLeftc = joints[JointType.HandTipLeft].Position;
             CameraSpacePoint sLeftc = joints[JointType.ShoulderLeft].Position;
@@ -577,6 +581,12 @@
             {
                 drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 150), 20, 20);
             }
+
+            Point textOrigin = new Point(450, 50);
+            // Denotes whether current region has been set or unset
+            drawingContext.DrawEllipse(Brushes.ForestGreen, new Pen(Brushes.ForestGreen, 1), textOrigin, 25, 25);
+            FormattedText writeThis = new FormattedText("SET", new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 8.0, Brushes.White);
+            drawingContext.DrawText(writeThis, textOrigin);
         }
         /// <summary>
         /// Draws a body
