@@ -180,6 +180,13 @@
             else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
         }
 
+        private void SendMessage(object sender, RoutedEventArgs e)
+        {
+
+            OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
+            oscLocal.Send(elem2);
+        }
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
