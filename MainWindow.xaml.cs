@@ -867,7 +867,7 @@
             DepthSpacePoint el = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ElbowLeft].Position);
             DepthSpacePoint wl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.WristLeft].Position);
 
-            float armLength = Utils.Length(sl, el) + Utils.Length(el, wl);
+            float armLength = Utils.LengthFloat(sl, el) + Utils.LengthFloat(el, wl);
 
             float min = sl.X - armLength;
             float max = sl.X;

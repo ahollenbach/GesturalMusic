@@ -35,7 +35,7 @@ namespace GesturalMusic
             return (value < min) ? min : (value > max) ? max : value;
         }
 
-        public static float Length(Joint p1, Joint p2)
+        public static float LengthFloat(Joint p1, Joint p2)
         {
             return (float)Math.Sqrt(
                 Math.Pow(p1.Position.X - p2.Position.X, 2) +
@@ -43,9 +43,24 @@ namespace GesturalMusic
                 Math.Pow(p1.Position.Z - p2.Position.Z, 2));
         }
 
-        public static float Length(DepthSpacePoint p1, DepthSpacePoint p2)
+        public static float LengthFloat(DepthSpacePoint p1, DepthSpacePoint p2)
         {
             return (float)Math.Sqrt(
+                Math.Pow(p1.X - p2.X, 2) +
+                Math.Pow(p1.Y - p2.Y, 2));
+        }
+
+        public static double Length(Joint p1, Joint p2)
+        {
+            return Math.Sqrt(
+                Math.Pow(p1.Position.X - p2.Position.X, 2) +
+                Math.Pow(p1.Position.Y - p2.Position.Y, 2) +
+                Math.Pow(p1.Position.Z - p2.Position.Z, 2));
+        }
+
+        public static double Length(DepthSpacePoint p1, DepthSpacePoint p2)
+        {
+            return Math.Sqrt(
                 Math.Pow(p1.X - p2.X, 2) +
                 Math.Pow(p1.Y - p2.Y, 2));
         }

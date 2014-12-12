@@ -85,10 +85,13 @@ namespace GesturalMusic
         }
         public void CheckAndPlayNote(Body body)
         {
+            double minThreshold = 0.1;
+            double maxThreshold = 0.2;
+
             // We're trying to play a MIDI instrument
             if (body.HandRightState == HandState.Closed)
             {
-                float armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
+                double armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
                                   Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
 
                 float min = body.Joints[JointType.ShoulderLeft].Position.X - armLength;
