@@ -13,23 +13,39 @@ namespace GesturalMusic
         private string name;
         private UdpWriter osc;
 
+        // For rate limiting
+        private DateTime lastNotePlayed;
+        private static TimeSpan rateLimit = new TimeSpan(0, 0, 0, 0, 30);
+
+        // For hand closed state (playing state)
+        HandState handStateLast;
+        int lastSemitone;
+
         public Instrument(UdpWriter osc, string name)
         {
             this.name = name;
             this.osc = osc;
+
+            lastNotePlayed = DateTime.Now;
+            handStateLast = HandState.Unknown;
+            lastSemitone = -1;
         }
 
-        public void PlayNote(int pitch, int velocity = 50, int duration = 300, int midiChannel = 1)
+        public void PlayNote(int pitch, int velocity = 127, int duration = 500, int midiChannel = 1)
         {
-            OscElement elem = new OscElement("/" + this.name, pitch, velocity, duration, midiChannel);
-            this.osc.Send(elem);
+            if (lastNotePlayed + rateLimit <= DateTime.Now)
+            {
+                Console.WriteLine("Playing: " + this.name + " " + pitch + " " + velocity + " " + duration + " " + midiChannel);
+                OscElement elem = new OscElement("/" + this.name, pitch, velocity, duration, midiChannel);
+                this.osc.Send(elem);
+
+                lastNotePlayed = DateTime.Now;
+            }
         }
         public bool CheckAndPlayNote(Body body)
         {
             double minThreshold = 0.2;
             double maxThreshold = 0.1;
-
-            Console.WriteLine(body.HandRightState);
 
             // We're trying to play a MIDI instrument
             if (body.HandRightState == HandState.Closed)
@@ -48,7 +64,6 @@ namespace GesturalMusic
                 double pos = body.Joints[JointType.WristLeft].Position.X;
 
                 double percentage = (pos - min) / (max - min);
-                Console.WriteLine("Percentage " + percentage);
 
                 int semitone = 0;
                 try
@@ -65,7 +80,6 @@ namespace GesturalMusic
                     // Problem getting the note (maybe the hand state wasn't good?), so do nothing
                     return false;
                 }
-
 
                 //////////////////////////////////////////////////////////////
                 // Octave
@@ -99,6 +113,13 @@ namespace GesturalMusic
                 //////////////////////////////////////////////////////////////
                 // Send
                 //////////////////////////////////////////////////////////////
+                if (body.HandRightState == handStateLast && semitone == lastSemitone)
+                {
+                    // for now, only play notes if the previous state was not this one.
+                    return false;
+                }
+                handStateLast = body.HandRightState;
+                lastSemitone = semitone;
 
                 int pitch = octave + semitone;
 
@@ -107,6 +128,7 @@ namespace GesturalMusic
 
                 return true;
             }
+            handStateLast = body.HandRightState;
             return false;
         }
 
@@ -143,18 +165,18 @@ namespace GesturalMusic
             }
             else
             {
+                // Console.WriteLine("Left hand not open or closed.");
                 throw new Exception();
             }
 
-            for (int i = semitoneRanges.Count; i >= 0; i--)
+            for (int i = semitoneRanges.Count-1; i >= 0; i--)
             {
                 if (percentage > semitoneRanges[i].Item1)
                 {
                     return semitoneRanges[i].Item2;
                 }
             }
-
-            throw new Exception();
+            return semitoneRanges[0].Item2;
         }
     }
 }

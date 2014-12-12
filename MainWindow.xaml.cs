@@ -126,13 +126,10 @@
         /// </summary>
         private string statusText = null;
 
-
-        // =========  
-        //===========
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.212.195";
+        private String oscHost = "129.21.118.93";
 
         /// <summary>
         /// The port to send to: default 9001
@@ -184,7 +181,7 @@
         {
 
             OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
-            oscLocal.Send(elem2);
+            osc.Send(elem2);
         }
 
         /// <summary>
@@ -210,7 +207,7 @@
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                instruments[i] = new Instrument(oscLocal, "instr" + i);
+                instruments[i] = new Instrument(osc, "instr" + i);
             }
 
 
