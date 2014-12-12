@@ -24,25 +24,52 @@ namespace GesturalMusic
             OscElement elem = new OscElement("/" + this.name, pitch, velocity, duration, midiChannel);
             this.osc.Send(elem);
         }
-        public void CheckAndPlayNote(Body body)
+        public bool CheckAndPlayNote(Body body)
         {
-            double minThreshold = 0.1;
-            double maxThreshold = 0.2;
+            double minThreshold = 0.2;
+            double maxThreshold = 0.1;
+
+            Console.WriteLine(body.HandRightState);
 
             // We're trying to play a MIDI instrument
             if (body.HandRightState == HandState.Closed)
             {
+                //////////////////////////////////////////////////////////////
+                // Semitone
+                //////////////////////////////////////////////////////////////
+
                 double armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
                                   Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
 
-                double min = body.Joints[JointType.ShoulderLeft].Position.X - armLength;
-                double max = body.Joints[JointType.ShoulderLeft].Position.X;
+                double min = body.Joints[JointType.ShoulderLeft].Position.X - armLength + armLength * minThreshold;
+                double max = body.Joints[JointType.ShoulderLeft].Position.X - armLength * maxThreshold;
 
                 // Base our measurements off the wrist location
                 double pos = body.Joints[JointType.WristLeft].Position.X;
 
-                // Clamp the pitch to only be 0.8 of the full extension of the arm (helps with lower and upper octaves)
-                int semitone = 1 - (int)Utils.Clamp(0f, 1f, (float)(1 - (pos - min) / (max - min)));
+                double percentage = (pos - min) / (max - min);
+                Console.WriteLine("Percentage " + percentage);
+
+                int semitone = 0;
+                try
+                {
+                    semitone = getSemitone(percentage, body.HandLeftState);
+                    if (semitone == -1)
+                    {
+                        // This is the E# (the one black key that we don't want to play)
+                        return false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Problem getting the note (maybe the hand state wasn't good?), so do nothing
+                    return false;
+                }
+
+
+                //////////////////////////////////////////////////////////////
+                // Octave
+                //////////////////////////////////////////////////////////////
 
                 // baseOctave is the lowest octave - so, if in C, we want our lowest note to be C3 (0-based)
                 // userOctave can add to baseOctave, so our octaves available start at C3 (lower), C4 (slightly down), and C5 (above shoulder)
@@ -62,17 +89,72 @@ namespace GesturalMusic
                 }
                 else
                 {
-                    return;
+                    return false;
                 }
 
                 // Scale octave to 12 semitones per octave
                 int octave = (userOctave + baseOctave) * 12;
 
+
+                //////////////////////////////////////////////////////////////
+                // Send
+                //////////////////////////////////////////////////////////////
+
                 int pitch = octave + semitone;
 
                 // Send a note
-                this.PlayNote(pitch,2,3,"df");
+                this.PlayNote(pitch);
+
+                return true;
             }
+            return false;
+        }
+
+        private int getSemitone(double percentage, HandState handState)
+        {
+            List<Tuple<double, int>> semitoneRanges;
+
+            if (handState == HandState.Closed)
+            {
+                // black semitones (minimums)
+                semitoneRanges = new List<Tuple<double, int>>
+                {
+                    Tuple.Create(0.0  ,  1),
+                    Tuple.Create(1.5/7,  3),
+                    Tuple.Create(2.5/7, -1),
+                    Tuple.Create(3.5/7,  6),
+                    Tuple.Create(4.5/7,  8),
+                    Tuple.Create(5.5/7, 10)
+                };
+            }
+            else if (handState == HandState.Open)
+            {
+                // white semitones (minimums)
+                semitoneRanges = new List<Tuple<double, int>>
+                {
+                    Tuple.Create(0.0  ,  0),
+                    Tuple.Create(1.0/7,  2),
+                    Tuple.Create(2.0/7,  4),
+                    Tuple.Create(3.0/7,  5),
+                    Tuple.Create(4.0/7,  7),
+                    Tuple.Create(5.0/7,  9),
+                    Tuple.Create(6.0/7, 11)
+                };
+            }
+            else
+            {
+                throw new Exception();
+            }
+
+            for (int i = semitoneRanges.Count; i >= 0; i--)
+            {
+                if (percentage > semitoneRanges[i].Item1)
+                {
+                    return semitoneRanges[i].Item2;
+                }
+            }
+
+            throw new Exception();
         }
     }
 }

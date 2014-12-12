@@ -209,7 +209,7 @@
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                instruments[i] = new MidiDrum(oscLocal, "instr" + i);
+                instruments[i] = new Instrument(oscLocal, "instr" + i);
             }
 
 
@@ -493,8 +493,8 @@
             }
 
             // Ask the instrument if it wants to play
-            MidiDrum drum = (MidiDrum)instruments[partition];
-            if (drum.CheckAndPlayNote(body))
+            Instrument instrument = instruments[partition];
+            if (instrument.CheckAndPlayNote(body))
             {
                 return true;
             }
@@ -764,7 +764,7 @@
 
             // Get the angle between the two lines by using inbuilt Vector3D function
             double angle2 = Vector3D.AngleBetween(line2, line1);
-            Console.WriteLine(" angle iiiisssssssssssssssssssss theeeeeesss" + angle2);
+            //Console.WriteLine(" angle iiiisssssssssssssssssssss theeeeeesss" + angle2);
 
 
             // If handtip is at the required angle w.r.t the left shoulder
