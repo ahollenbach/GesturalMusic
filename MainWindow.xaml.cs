@@ -19,6 +19,8 @@
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        string val1 = "void";
+
         /// <summary>
         /// Radius of drawn hand circles
         /// </summary>
@@ -438,8 +440,9 @@
                             DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
                             jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
                         }
-                                                
-                        this.InstrumentSelect(b, joints, jointPoints, dc, PartitionManager.getCurrentPartitionType() );
+                        
+                        this.decidePartitionToBeChecked(b, joints, jointPoints, dc);
+                        //this.InstrumentSelect(b, joints, jointPoints, dc );
                         this.DrawBody(joints, jointPoints, dc, drawPen);
 
                         this.DrawHand(b.HandLeftState, jointPoints[JointType.HandLeft], dc);
@@ -514,19 +517,228 @@
             }
         }
 
+        /// <summary>
+        /// Change Partition Manager parameters to store set instruments for partitions
+        /// of current PartitionType
+        /// </summary>
+        /// <param name="number"></param>
+        /// <param name="instrumentName"></param>
+        private void changeValuesinPartitionManager(int number, string instrumentName)
+        {
+            PartitionManager.isPartitionSet[number] = true;
+            PartitionManager.partitionInstrSetName[number] = instrumentName;
+            PartitionManager.val3 = instrumentName;
+        }
 
         /// <summary>
-        /// Set an instrument while coming for the first time into a partition
+        /// Check the current PartitionType which is selected and if an instrument
+        /// has been set for the partition the body is in that PartitionType 
+        /// </summary>
+        /// <param name="b"></param>
+        /// <param name="joints"></param>
+        /// <param name="jointPoints"></param>
+        /// <param name="drawingContext"></param>
+        private void decidePartitionToBeChecked(Body b, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
+        {
+            // DOUBLE LEFT RIGHT PARTITIONS
+            if(PartitionManager.currentPartitionType == PartitionType.DoubleLeftRight)
+            {
+                int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
+
+                // Check if in LEFT partition
+                if (whichPartitionAmIIn == 0)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for LEFT partition
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);                                                        
+                        }
+                    }
+                }
+                // Check if in RIGHT partition
+                else if (whichPartitionAmIIn == 1)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for RIGHT partition
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if(temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);      
+                        }
+                    }
+                }
+            } // END DOUBLE LEFT RIGHT PARTITIONS
+
+            // START DOUBLE FRONT BACK PARTITIONS
+            else if(PartitionManager.currentPartitionType == PartitionType.DoubleFrontBack)
+            {
+                int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
+
+                // Check if in FRONT partition
+                if (whichPartitionAmIIn == 0)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for FRONT partition
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+                    }
+                }
+                // Check if in BACK partition
+                else if (whichPartitionAmIIn == 1)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for BACK partition
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+                    }
+                }
+            } // END DOUBLE FRONT BACK PARTITIONS
+
+            // START QUAD PARTITIONS
+            else if(PartitionManager.currentPartitionType == PartitionType.Quad)
+            {
+                int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
+                
+                // Check if in partition 0
+                if (whichPartitionAmIIn == 0)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for partition 0
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+
+                    }
+                }
+                // Check if in partition 1
+                else if (whichPartitionAmIIn == 1)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for partition 1
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+                    }
+                }
+                // Check if in partition 2
+                else if (whichPartitionAmIIn == 2)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for partition 2
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+
+                    }
+                }
+                // Check if in partition 3
+                else if (whichPartitionAmIIn == 3)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag for partition 3
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+                    }
+                }
+            } // END QUAD PARTITIONS
+
+            
+            // DEFAULT
+            // START SINGLE PARTITION
+            else
+            {
+                int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
+
+                // Check partition
+                if (whichPartitionAmIIn == 0)
+                {
+                    PartitionManager.val3 = PartitionManager.partitionInstrSetName[whichPartitionAmIIn];
+
+                    // Check flag partition
+                    if (!PartitionManager.isPartitionSet[whichPartitionAmIIn])
+                    {
+                        string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
+
+                        if (temp != "void")                        
+                        {
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
+                        }
+                    }
+                }
+            }
+
+            // Display "UNSET" or "SET INSTRUMENT_NAME" at the top right corner of
+            // the screen for the current partition
+            if (PartitionManager.val3 == "void")
+            {
+                displaySetConfirmation(drawingContext, "UNSET");
+            }
+            else
+            {
+                displaySetConfirmation(drawingContext, "SET " + PartitionManager.val3);
+            }
+        }
+
+        /// <summary>
+        /// Set an instrument for current partition by choosing from a list of
+        /// instruments
         /// </summary>
         /// <param name="joints"></param>
         /// <param name="jointPoints"></param>
         /// <param name="drawingContext"></param>
-        private void InstrumentSelect(Body body, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext, int partitionNumber)
+        private string InstrumentSelect(Body body, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
         {
-            
-
-
-
+            //PartitionType partVal = PartitionManager.getCurrentPartitionType();
+            //PartitionManager.currentPartitionType
             // Get HandTipLeft and ShoulderLeft positions
             CameraSpacePoint htLeftc = joints[JointType.HandTipLeft].Position;
             CameraSpacePoint sLeftc = joints[JointType.ShoulderLeft].Position;
@@ -552,40 +764,59 @@
             // AND HandState is closed
             // SELECT current option
 
-            // Hand at approx 45 degrees
-            if (angle2 > 40 && angle2 < 50 && body.HandLeftState == HandState.Closed)
+            if (htLeftc.Y > sLeftc.Y)
             {
-                drawingContext.DrawEllipse(Brushes.RoyalBlue, new Pen(Brushes.RoyalBlue, 1), new Point(100, 100), 20, 20);
-            }
-            else
-            {
-                drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 100), 20, 20);
+                // Hand at approximately 25 degrees
+                if (angle2 > 20 && angle2 < 30 && body.HandLeftState == HandState.Closed)
+                {
+                    drawingContext.DrawEllipse(Brushes.IndianRed, new Pen(Brushes.MistyRose, 1), new Point(100, 150), 20, 20);
+                    if (body.HandRightState == HandState.Lasso) return "instr0";
+                }
+                else
+                {
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 150), 20, 20);
+                }
+
+                // Hand at approx 45 degrees
+                if (angle2 > 40 && angle2 < 50 && body.HandLeftState == HandState.Closed)
+                {
+                    drawingContext.DrawEllipse(Brushes.RoyalBlue, new Pen(Brushes.RoyalBlue, 1), new Point(100, 100), 20, 20);
+                    if (body.HandRightState == HandState.Lasso) return "instr1";
+                }
+                else
+                {
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 100), 20, 20);
+                }
+
+                // Hand at approximately 65 degrees
+                if (angle2 > 60 && angle2 < 70 && body.HandLeftState == HandState.Closed)
+                {
+                    drawingContext.DrawEllipse(Brushes.Goldenrod, new Pen(Brushes.SandyBrown, 1), new Point(150, 100), 20, 20);
+                    if (body.HandRightState == HandState.Lasso) return "instr2";
+                }
+                else
+                {
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(150, 100), 20, 20);
+                }
+
             }
 
-            // Hand at approximately 65 degrees
-            if (angle2 > 60 && angle2 < 70 && body.HandLeftState == HandState.Closed)
-            {
-                drawingContext.DrawEllipse(Brushes.SandyBrown, new Pen(Brushes.SandyBrown, 1), new Point(150, 100), 20, 20);
-            }
-            else
-            {
-                drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(150, 100), 20, 20);
-            }
+            return "void";
+        }
 
-            // Hand at approximately 25 degrees
-            if (angle2 > 20 && angle2 < 30 && body.HandLeftState == HandState.Closed)
-            {
-                drawingContext.DrawEllipse(Brushes.MistyRose, new Pen(Brushes.MistyRose, 1), new Point(100, 150), 20, 20);
-            }
-            else
-            {
-                drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 150), 20, 20);
-            }
-
-            Point textOrigin = new Point(450, 50);
+        /// <summary>
+        /// Display if an instrument is set or unset for current partition
+        /// in the top right of the screen
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <param name="drawingContext"></param>
+        private void displaySetConfirmation(DrawingContext drawingContext, string displayThis)
+        {
+            Point textOrigin = new Point(420, 40);
+            Point ellipseOrigin = new Point(450, 50);
             // Denotes whether current region has been set or unset
-            drawingContext.DrawEllipse(Brushes.ForestGreen, new Pen(Brushes.ForestGreen, 1), textOrigin, 25, 25);
-            FormattedText writeThis = new FormattedText("SET", new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 8.0, Brushes.White);
+            drawingContext.DrawEllipse(Brushes.ForestGreen, new Pen(Brushes.ForestGreen, 1), ellipseOrigin, 40, 40);
+            FormattedText writeThis = new FormattedText(displayThis, new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 15.0, Brushes.White);
             drawingContext.DrawText(writeThis, textOrigin);
         }
         /// <summary>

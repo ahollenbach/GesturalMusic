@@ -17,15 +17,15 @@ namespace GesturalMusic
 
     static class PartitionManager
     {
-        static PartitionType currentPartitionType;
+        public static PartitionType currentPartitionType;
 
-        static bool singleSet;
+        // Store whether the partitions are set or not
+        public static bool[] isPartitionSet = new bool[] {false, false, false, false};
 
-        static bool doubleLeftSet, doubleRightSet;
+        // Store which instruments the partitions are set with, if set.
+        public static string[] partitionInstrSetName = new string[] { "void", "void", "void", "void" };
 
-        static bool doubleFrontSet, doubleBackSet;
-
-        static bool quad0Set, quad1Set, quad2Set, quad3Set;
+        public static string val3 = "void";
 
         /// <summary>
         /// Get the current partition in which the first tracked body resides in
@@ -82,34 +82,9 @@ namespace GesturalMusic
         public static void SetPartitionType(PartitionType type)
         {
             currentPartitionType = type;
-        }
-
-
-       /* /// <summary>
-        /// Get the type of current partition denoted by an integer
-        /// </summary>
-        /// <returns></returns>
-        public static int getCurrentPartitionType()
-        {
-            // Default value is for Single partition (i.e. No partition)
-            if (currentPartitionType == PartitionType.DoubleLeftRight)      return 2;
-            else if (currentPartitionType == PartitionType.DoubleFrontBack) return 3;
-            else if (currentPartitionType == PartitionType.Quad)            return 4;
-            else                                                            return 1;
-        }*/
-
-        /// <summary>
-        /// Get a boolean value indicating whether the current partition has been set or not
-        /// </summary>
-        /// <returns></returns>
-        public static bool getDoubleLeftSet() { return doubleLeftSet; }
-        public static bool getDoubleRightSet() { return doubleRightSet;  }
-        public static bool getDoubleFrontSet() { return doubleFrontSet; }
-        public static bool getDoubleBackSet() { return doubleBackSet; }
-        public static bool getQuad0Set() { return quad0Set; }
-        public static bool getQuad1Set() { return quad1Set; }
-        public static bool getQuad2Set() { return quad2Set; }
-        public static bool getQuad3Set() { return quad3Set; }
-
+            isPartitionSet = new bool[] { false, false, false, false };
+            partitionInstrSetName = new string[] { "void", "void", "void", "void" };
+            val3 = "void";
+        }               
     }
 }
