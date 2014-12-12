@@ -19,15 +19,15 @@
         <TextBlock Grid.Row="0" Margin="0 0 -1 0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="{StaticResource MediumGreyBrush}" FontFamily="Segoe UI" FontSize="18">GesturalMusic</TextBlock>
 
 
-        <GroupBox Header="Number of Partitions"  Grid.Row="1" HorizontalAlignment="Left">
-            <StackPanel>
+        <GroupBox Header="Number of Partitions"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,636">
+            <StackPanel Margin="0,0,-0.2,-0.4">
                 <RadioButton Name="onePartition" Content="One" Checked="SetNumPartitions"/>
                 <RadioButton Name="twoPartitionLR" Content="Two (L/R)" Checked="SetNumPartitions"/>
                 <RadioButton Name="twoPartitionFB" Content="Two (F/B)" Checked="SetNumPartitions"/>
                 <RadioButton Name="quadPartition" Content="Four" Checked="SetNumPartitions"/>
             </StackPanel>
         </GroupBox>
-        
+
         <Viewbox Grid.Row="1" HorizontalAlignment="Right">
             <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
         </Viewbox>
@@ -35,5 +35,10 @@
         <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem />
         </StatusBar>
+        <GroupBox Header="Send Message"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,104,0,518" Width="129">
+            <StackPanel Margin="0,0,-0.2,-0.4">
+                <Button x:Name="SendMessageButton" Content="Send Message" Click="SendMessage"/>
+            </StackPanel>
+        </GroupBox>
     </Grid>
 </Window>
