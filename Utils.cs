@@ -9,7 +9,28 @@ namespace GesturalMusic
 {
     class Utils
     {
+        /// <summary>
+        /// Clamps the value between the min and max
+        /// </summary>
+        /// <param name="min">The min to clamp to.</param>
+        /// <param name="max">The max to clamp to.</param>
+        /// <param name="value">The value to clamp.</param>
+        /// <returns>The value clamped. If the value is less than the minimum, it will return the minimum.
+        /// If the value is greater than the maximum, it will return the maximum.</returns>
         public static float Clamp(float min, float max, float value)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
+        }
+
+        /// <summary>
+        /// Clamps the value between the min and max
+        /// </summary>
+        /// <param name="min">The min to clamp to.</param>
+        /// <param name="max">The max to clamp to.</param>
+        /// <param name="value">The value to clamp.</param>
+        /// <returns>The value clamped. If the value is less than the minimum, it will return the minimum.
+        /// If the value is greater than the maximum, it will return the maximum.</returns>
+        public static float Clamp(int min, int max, int value)
         {
             return (value < min) ? min : (value > max) ? max : value;
         }
