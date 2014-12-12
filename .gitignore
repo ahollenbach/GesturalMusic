@@ -184,5 +184,9 @@ FakesAssemblies/
 Other/Max Api OSC.amxd
 Images/Thumbs.db
 Other/test Project/Desktop.ini
+<<<<<<< Updated upstream
 Other/Max Audio Effect/Max Api OSC.amxd
 *.db
+=======
+LooperOSC.cs
+>>>>>>> Stashed changes
