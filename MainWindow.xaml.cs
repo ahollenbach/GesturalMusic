@@ -127,7 +127,8 @@
         private string statusText = null;
 
 
-        // =========  OSC ===========
+        // =========  
+        //===========
         /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
@@ -177,13 +178,6 @@
             else if (twoPartitionLR.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleLeftRight);
             else if (twoPartitionFB.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleFrontBack);
             else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
-        }
-
-        private void SendMessage(object sender, RoutedEventArgs e)
-        {
-
-            OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
-            oscLocal.Send(elem2);
         }
 
         /// <summary>
