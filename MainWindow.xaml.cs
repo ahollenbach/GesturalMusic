@@ -161,7 +161,7 @@
         Dictionary<string, AbletonSwitchController> switches;
 
         Instrument[] instruments;
-
+        LooperOSC looper;
         /// <summary>
         /// Set the number of partitions 
         /// 
@@ -203,7 +203,7 @@
             // Initialize Ableton controllers
             ///////////////////////////////////////////////////////////////////////
             //Looper
-            LooperOSC looper = new LooperOSC(oscLocal); ;
+            looper = new LooperOSC(oscLocal); ;
             ///////////////////////////////////////////////////////////////////////
             // Instruments
             instruments = new Instrument[4];
@@ -388,7 +388,7 @@
             if (body != null)
             {
                 bool played = SendInstrumentData(body);
-
+                bool loop = ActivateLooper(body);
                 // Set the background color according to a few things
 
                 // If we detect either a trigger to start or stop the track, change the background color
@@ -461,6 +461,15 @@
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
             }
+        }
+
+        private bool ActivateLooper(Body body)
+        {
+            if (looper.LooperControl(body))
+            {
+                return true;
+            }
+            return false;
         }
 
 

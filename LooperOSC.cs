@@ -19,16 +19,17 @@ namespace GesturalMusic
         public LooperOSC(UdpWriter osc1)
         {
             //this.name = 
-            Console.WriteLine("Looper contructor");
+            Console.WriteLine("Looper constructor");
             oscLoop = osc1;
 
         }
 
         public void record()
         {
-            Console.WriteLine("Recording");
+            Console.WriteLine("Recording"); 
             OscElement o = new OscElement("Looper/0/State", "Record");
             oscLoop.Send(o);
+            Console.WriteLine("msg sent maybe??");
         }
         public void overdub()
         {
@@ -49,16 +50,44 @@ namespace GesturalMusic
             oscLoop.Send(o);
         }
 
-        public void LooperControl(Body body)
+        public bool LooperControl(Body body)
         {
-            Console.WriteLine("Inside LooperControl");
-            if (body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z)
-                if ((body.HandRightState == HandState.Closed && body.HandLeftState == HandState.Closed) &&
-                    ((body.Joints[JointType.HandTipRight].Position.Y > body.Joints[JointType.Head].Position.Y) &&
-                     (body.Joints[JointType.HandTipLeft].Position.Y > body.Joints[JointType.Head].Position.Y)))
-                {
-                    record();
-                }
+            try
+            {
+                if ((body.HandRightState == HandState.Lasso) && (body.HandLeftState == HandState.Closed))
+                    if (body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z)
+                    {
+                        this.record();
+                        Console.WriteLine("Activated");
+                        return true;
+                    }
+                    else if (body.Joints[JointType.AnkleRight].Position.Z < body.Joints[JointType.SpineBase].Position.Z)
+                    {
+                        this.overdub();
+                        return true;
+                    }
+                    else if (body.Joints[JointType.AnkleLeft].Position.Z < body.Joints[JointType.SpineBase].Position.Z)
+                    {
+                        this.play();
+                        return true;
+                    }
+                    else if (body.Joints[JointType.AnkleLeft].Position.Z > body.Joints[JointType.SpineBase].Position.Z)
+                    {
+                        this.stop();
+                        return true;
+                    }
+                    else
+                        return false;
+                else//(undo clear gestures??)
+                    return false;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+
+
         }
     }
 }
