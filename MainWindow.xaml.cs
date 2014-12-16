@@ -162,6 +162,9 @@
 
         Instrument[] instruments;
         LooperOSC looper;
+
+        public static double armLength;
+
         /// <summary>
         /// Set the number of partitions 
         /// 
@@ -372,7 +375,7 @@
                     // As long as those body objects are not disposed and not set to null in the array,
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
-                    
+
                     // do stuff
                     Update();
                 }
@@ -383,13 +386,31 @@
         {
             SolidColorBrush bgColor;
 
-
             // Selects the first body that is tracked and use that for our calculations
             Body body = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
+
             if (body != null)
             {
-                bool played = SendInstrumentData(body);
-                bool loop = ActivateLooper(body);
+                bool played;
+                bool loop;
+
+                // Set arm length if not yet set
+                if (armLength == null && body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
+                {
+                    armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
+                                Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
+                }
+                
+                if(armLength == null) {
+                    played = false;
+                    loop = false;
+                }
+                else
+                {
+                    played = SendInstrumentData(body);
+                    loop = ActivateLooper(body);
+                }
+
                 // Set the background color according to a few things
 
                 // If we detect either a trigger to start or stop the track, change the background color
@@ -874,30 +895,31 @@
                 }
             }
 
-            DepthSpacePoint sl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ShoulderLeft].Position);
-            DepthSpacePoint el = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ElbowLeft].Position);
-            DepthSpacePoint wl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.WristLeft].Position);
+            // Note guideline
 
-            float armLength = Utils.LengthFloat(sl, el) + Utils.LengthFloat(el, wl);
+            //DepthSpacePoint sl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ShoulderLeft].Position);
+            //DepthSpacePoint el = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.ElbowLeft].Position);
+            //DepthSpacePoint wl = this.coordinateMapper.MapCameraPointToDepthSpace(joints[JointType.WristLeft].Position);
 
-            float min = sl.X - armLength;
-            float max = sl.X;
-            float pos = wl.X;
+            //double rightThreshold = 0.2;
+            //double leftThreshold = 0.1;
+            //double leftMax = joints[JointType.ShoulderLeft].Position.X - MainWindow.armLength + MainWindow.armLength * rightThreshold;
+            //double rightMax = joints[JointType.ShoulderLeft].Position.X - MainWindow.armLength * leftThreshold;
 
-            Pen guidePen = new Pen(Brushes.Wheat, 2);
-            int guideHeight = 14;
-            double[] guideLinesX = new double[] { 1, 0.91, 0.75, 0.58, 0.41, 0.24, 0.08 };
-            for (int i = 0; i < guideLinesX.Length; i++)
-            {
-                drawingContext.DrawLine(guidePen, new Point(sl.X - armLength * guideLinesX[i], sl.Y - guideHeight / 2), new Point(sl.X - armLength * guideLinesX[i], sl.Y + guideHeight / 2));
-            }
+            //Pen guidePen = new Pen(Brushes.Wheat, 2);
+            //int guideHeight = 14;
+            //double[] guideLinesX = new double[] { 1, 0.91, 0.75, 0.58, 0.41, 0.24, 0.08 };
+            //for (int i = 0; i < guideLinesX.Length; i++)
+            //{
+            //    drawingContext.DrawLine(guidePen, new Point(sl.X - armLength * guideLinesX[i], sl.Y - guideHeight / 2), new Point(sl.X - armLength * guideLinesX[i], sl.Y + guideHeight / 2));
+            //}
 
             // Base horizontal line
-            drawingContext.DrawLine(guidePen, new Point(sl.X, sl.Y), new Point(sl.X - armLength, sl.Y));
+            //drawingContext.DrawLine(guidePen, new Point(sl.X, sl.Y), new Point(sl.X - armLength, sl.Y));
 
 
             // Line on the hand
-            drawingContext.DrawLine(new Pen(Brushes.Chartreuse, 1), new Point(wl.X, wl.Y + 30), new Point(wl.X, wl.Y - 30));
+            //drawingContext.DrawLine(new Pen(Brushes.Chartreuse, 1), new Point(wl.X, wl.Y + 30), new Point(wl.X, wl.Y - 30));
 
                    
             

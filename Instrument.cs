@@ -44,8 +44,8 @@ namespace GesturalMusic
         }
         public bool CheckAndPlayNote(Body body)
         {
-            double minThreshold = 0.2;
-            double maxThreshold = 0.1;
+            double rightThreshold = 0.2;
+            double leftThreshold = 0.1;
 
             // We're trying to play a MIDI instrument
             if (body.HandRightState == HandState.Closed)
@@ -54,16 +54,13 @@ namespace GesturalMusic
                 // Semitone
                 //////////////////////////////////////////////////////////////
 
-                double armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
-                                  Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
-
-                double min = body.Joints[JointType.ShoulderLeft].Position.X - armLength + armLength * minThreshold;
-                double max = body.Joints[JointType.ShoulderLeft].Position.X - armLength * maxThreshold;
+                double leftMax = body.Joints[JointType.ShoulderLeft].Position.X - MainWindow.armLength + MainWindow.armLength * rightThreshold;
+                double rightMax = body.Joints[JointType.ShoulderLeft].Position.X - MainWindow.armLength * leftThreshold;
 
                 // Base our measurements off the wrist location
                 double pos = body.Joints[JointType.WristLeft].Position.X;
 
-                double percentage = (pos - min) / (max - min);
+                double percentage = (pos - leftMax) / (rightMax - leftMax);
 
                 int semitone = 0;
                 try
