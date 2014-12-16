@@ -180,7 +180,8 @@
         private void SendMessage(object sender, RoutedEventArgs e)
         {
 
-            OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
+            //OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
+            OscElement elem2 = new OscElement("/Looper/1/State", "Record");
             osc.Send(elem2);
         }
 
@@ -210,7 +211,7 @@
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                instruments[i] = new Instrument(osc, "instr" + i);
+                instruments[i] = new Instrument(oscLocal, "instr" + i);
             }
 
 
