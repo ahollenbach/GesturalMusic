@@ -567,6 +567,7 @@
             PartitionManager.isPartitionSet[number] = true;
             PartitionManager.partitionInstrSetName[number] = instrumentName;
             PartitionManager.val3 = instrumentName;
+            instruments[number] = new Instrument(osc,instrumentName);
         }
 
         /// <summary>
