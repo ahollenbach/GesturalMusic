@@ -184,8 +184,8 @@
         {
 
             //OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
-            OscElement elem2 = new OscElement("/Looper/1/State", "Record");
-            osc.Send(elem2);
+            OscElement elem2 = new OscElement("/Looper/0/State", "Record");
+            oscLocal.Send(elem2);
         }
 
         /// <summary>
