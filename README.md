@@ -11,7 +11,7 @@ This project requires the following:
 * Windows 8, Windows 8.1, or Windows Embedded Standard 8
 * [Kinect for Windows SDK 2.0 Public Preview](http://www.microsoft.com/en-us/kinectforwindows/develop/)
 * [Visual Studio](http://www.visualstudio.com/)
-* [Ableton Live](https://www.ableton.com/en/live/new-in-9/) (tested on Live 9)
+* [Ableton Live](https://www.ableton.com/en/live/new-in-9/)
 * [Max for Live](https://www.ableton.com/en/live/max-for-live/)
 
 2. Installation
