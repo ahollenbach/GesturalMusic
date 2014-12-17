@@ -18,7 +18,7 @@ namespace GesturalMusic
         //private bool isUndo = false;
         private string name;
         private UdpWriter oscLoop;
-        private int port = 22345;
+        private int port = 22344;
         private string host = "127.0.0.1";
 
 
@@ -26,13 +26,13 @@ namespace GesturalMusic
         {
             //this.name = 
             Console.WriteLine("Looper constructor");
-            oscLoop = osc1;
+            oscLoop = new UdpWriter(host, port);
 
         }
 
         public void record()
         {
-            if (isRecd)
+            if (!isRecd)
             {
                 Console.WriteLine("Recording");
                 OscElement o = new OscElement("/Looper/0/State", "Record");
@@ -49,7 +49,7 @@ namespace GesturalMusic
        
         public void overdub()
         {
-            if (isOvdb)
+            if (!isOvdb)
             {
                 OscElement o = new OscElement("/Looper/0/State", "Overdub");
                 oscLoop.Send(o);
@@ -65,7 +65,7 @@ namespace GesturalMusic
 
         public void play()
         {
-            if (isPlay)
+            if (!isPlay)
             {
                 OscElement o = new OscElement("/Looper/0/State", "Play");
                 oscLoop.Send(o);
@@ -78,12 +78,15 @@ namespace GesturalMusic
 
         public void stop()
         {
-            OscElement o = new OscElement("/Looper/0/State", "Stop");
-            oscLoop.Send(o);
-            isRecd = false;
-            isOvdb = false;
-            isPlay = false;
-            isStop = true;
+            if (!isStop)
+            {
+                OscElement o = new OscElement("/Looper/0/State", "Stop");
+                oscLoop.Send(o);
+                isRecd = false;
+                isOvdb = false;
+                isPlay = false;
+                isStop = true;
+            }
         }
 
         public bool LooperControl(Body body)
@@ -91,17 +94,16 @@ namespace GesturalMusic
             try
             {
                 if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
-                    (body.Joints[JointType.WristRight].Position.Y < body.Joints[JointType.SpineMid].Position.Y))
+                    (body.Joints[JointType.WristRight].Position.Y < body.Joints[JointType.SpineShoulder].Position.Y))
                     if ((body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z) && 
                         (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) > 
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.record();
-                        Console.WriteLine("Record Activated");
                         return true;
                     }
                     else if ((body.Joints[JointType.AnkleRight].Position.Z < body.Joints[JointType.SpineBase].Position.Z) &&
-                        (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) <
+                        (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) >
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.overdub();
@@ -115,7 +117,7 @@ namespace GesturalMusic
                         return true;
                     }
                     else if ((body.Joints[JointType.AnkleLeft].Position.Z > body.Joints[JointType.SpineBase].Position.Z) &&
-                        (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) >
+                        (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) <
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.stop();
@@ -123,11 +125,11 @@ namespace GesturalMusic
                     }
                     else
                         return false;
-                else if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
+                else /*if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
                     (body.Joints[JointType.WristRight].Position.Y > body.Joints[JointType.SpineShoulder].Position.Y))
                 {
                     Console.WriteLine("Undo/Clear");
-                }
+                }*/
                     return false;
             }
             catch (Exception e)
