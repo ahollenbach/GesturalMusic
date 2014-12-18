@@ -20,8 +20,8 @@ namespace GesturalMusic
         private static TimeSpan rateLimit = new TimeSpan(0, 0, 0, 0, 10);
 
         // Velocity tracker
-        private float lWristVelocity;
-        private float rWristVelocity;
+        private double lWristVelocity;
+        private double rWristVelocity;
         private Joint lWristLocationLast;
         private Joint rWristLocationLast;
         private DateTime lastFrame;
@@ -41,12 +41,13 @@ namespace GesturalMusic
             rWristVelocity = 0f;
         }
 
-        public void PlayNote(float pitchVal, float velocityVal, float octaveVal) {
+        public void PlayNote(double pitchVal, double velocityVal, double octaveVal) {
+            Console.WriteLine("sending " + pitchVal);
             // rate limit as to note overwhelm Ableton
             if (lastNotePlayed + rateLimit <= DateTime.Now)
             {
-                pitch.Send(pitchVal);
-                velocity.Send(velocityVal);
+                pitch.Send((float)pitchVal);
+                velocity.Send((float)velocityVal);
                 noteOn.SwitchOn(true);
 
                 lastNotePlayed = DateTime.Now;
@@ -59,12 +60,8 @@ namespace GesturalMusic
 
         new public bool CheckAndPlayNote(Body body)
         {
-            float armLength = Utils.LengthFloat(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
-                                Utils.LengthFloat(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
-
-            float threshold = 0.85f * armLength;         // Don't even look for a hit unless more than threshold out
-            float xThreshold = 0.25f * armLength;         // Don't even look for a hit unless more than threshold out in X
-
+            double threshold = 0.85 * MainWindow.armLength;         // Don't even look for a hit unless more than threshold out
+            double xThreshold = 0.25 * MainWindow.armLength;         // Don't even look for a hit unless more than threshold out in X
 
             // Set locations if first time
             if (lWristLocationLast == null || rWristLocationLast == null)
@@ -83,22 +80,22 @@ namespace GesturalMusic
             // left hand
             Joint lWrist  = body.Joints[JointType.WristLeft];
             // TODO switch back to length
-            float dLWristPos = (lWrist.Position.X < lWristLocationLast.Position.X ? -1 : 1) * Utils.LengthFloat(lWrist, lWristLocationLast);
-            float newLWristVelocity = dLWristPos/(float)dt.TotalMilliseconds;
+            double dLWristPos = (lWrist.Position.X < lWristLocationLast.Position.X ? -1 : 1) * (double)Utils.LengthFloat(lWrist, lWristLocationLast);
+            double newLWristVelocity = dLWristPos/dt.TotalMilliseconds;
 
             // If change in direction, and we're at least halfway extended
-            if (newLWristVelocity > 0 && lWristVelocity < 0 && Utils.LengthFloat(body.Joints[JointType.WristLeft], body.Joints[JointType.ShoulderLeft]) > threshold && Math.Abs(lWrist.Position.X - body.Joints[JointType.ShoulderLeft].Position.X) > xThreshold)
+            if (newLWristVelocity > 0 && lWristVelocity < 0 && (double)Utils.LengthFloat(body.Joints[JointType.WristLeft], body.Joints[JointType.ShoulderLeft]) > threshold && Math.Abs(lWrist.Position.X - body.Joints[JointType.ShoulderLeft].Position.X) > xThreshold)
             {
                 // Calculate which pad we're hitting
                 //  5  O  2 
                 //  4--|--1
                 //  3 /\  0
-                float pad = 0f;
+                double pad = 0f;
                 if (lWrist.Position.Y > body.Joints[JointType.ShoulderLeft].Position.Y)
                 {
                     pad = 2;
                 }
-                else if (lWrist.Position.Y > body.Joints[JointType.SpineBase].Position.Y + 0.4 * Utils.LengthFloat(body.Joints[JointType.SpineMid], body.Joints[JointType.SpineBase]))
+                else if (lWrist.Position.Y > body.Joints[JointType.SpineBase].Position.Y + 0.4 * (double)Utils.LengthFloat(body.Joints[JointType.SpineMid], body.Joints[JointType.SpineBase]))
                 {
                     pad = 1;
                 }
@@ -110,8 +107,8 @@ namespace GesturalMusic
 
             // right hand
             Joint rWrist = body.Joints[JointType.WristRight];
-            float dRWristPos = Utils.LengthFloat(rWrist, rWristLocationLast);
-            float newRWristVelocity = dRWristPos / (float)dt.TotalMilliseconds;
+            double dRWristPos = (double)Utils.LengthFloat(rWrist, rWristLocationLast);
+            double newRWristVelocity = dRWristPos / dt.TotalMilliseconds;
 
             // If change in direction, and we're at least halfway extended
             if (newRWristVelocity < 0 && rWristVelocity > 0 && body.Joints[JointType.WristRight].Position.X > threshold)
@@ -120,7 +117,7 @@ namespace GesturalMusic
                 //  5  O  2 
                 //  4--|--1
                 //  3 /\  0
-                float pad = 3f;
+                double pad = 3f;
                 if (rWrist.Position.Y > body.Joints[JointType.ShoulderRight].Position.Y)
                 {
                     pad = 5;

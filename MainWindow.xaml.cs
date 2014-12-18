@@ -204,7 +204,7 @@
             {
                 instruments[i] = new Instrument("instr" + i);
             }
-            instruments[2] = new Instrument("pad0");
+            instruments[2] = new MidiPad("pad0");
 
 
             ///////////////////////////////////////////////////////////////////////
@@ -515,6 +515,16 @@
 
             // Ask the instrument if it wants to play
             Instrument instrument = instruments[partition];
+            if (instrument.GetInstrumentType() == Instrument.PAD)
+            {
+                MidiPad pad = (MidiPad)instruments[partition];
+
+                if (pad.CheckAndPlayNote(body))
+                {
+                    return true;
+                }
+                return false;
+            }
             if (instrument.CheckAndPlayNote(body))
             {
                 return true;

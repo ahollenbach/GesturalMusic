@@ -10,6 +10,12 @@ namespace GesturalMusic
 {
     class Instrument
     {
+        // for different types
+        public readonly static String PAD        = "Pad";
+        public readonly static String INSTRUMENT = "Instrument";
+
+
+
         private string name;
 
         // For rate limiting
@@ -27,6 +33,16 @@ namespace GesturalMusic
             lastNotePlayed = DateTime.Now;
             handStateLast = HandState.Unknown;
             lastSemitone = -1;
+        }
+
+        public String GetInstrumentType()
+        {
+            if (this.name.Contains("pad"))
+            {
+                return Instrument.PAD;
+            }
+
+            return Instrument.INSTRUMENT;
         }
 
         public void PlayNote(int pitch, int velocity = 127, int duration = 500, int midiChannel = 1)
