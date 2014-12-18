@@ -20,7 +20,7 @@ namespace GesturalMusic
         private UdpWriter oscLoop;
         private int port = 22344;
         private string host = "127.0.0.1";
-
+        private double barrier = 0.2;
 
         public LooperOSC(UdpWriter osc1)
         {
@@ -89,34 +89,47 @@ namespace GesturalMusic
             }
         }
 
+        public void clear()
+        {
+            /*
+            OscElement o = new OscElement("/Looper/0/State", "Record");
+            oscLoop.Send(o);
+            isRecd = false;
+            isOvdb = false;
+            isPlay = false;
+            isStop = false;
+            o = new OscElement("/Looper/0/State", "Stop");
+            oscLoop.Send(o);
+             */
+        }
         public bool LooperControl(Body body)
         {
             try
             {
                 if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
                     (body.Joints[JointType.WristRight].Position.Y < body.Joints[JointType.SpineShoulder].Position.Y))
-                    if ((body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z) && 
+                    if ((body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z + barrier) && 
                         (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) > 
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.record();
                         return true;
                     }
-                    else if ((body.Joints[JointType.AnkleRight].Position.Z < body.Joints[JointType.SpineBase].Position.Z) &&
+                    else if ((body.Joints[JointType.AnkleRight].Position.Z < body.Joints[JointType.SpineBase].Position.Z + barrier) &&
                         (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) >
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.overdub();
                         return true;
                     }
-                    else if ((body.Joints[JointType.AnkleLeft].Position.Z < body.Joints[JointType.SpineBase].Position.Z) &&
+                    else if ((body.Joints[JointType.AnkleLeft].Position.Z < body.Joints[JointType.SpineBase].Position.Z + barrier) &&
                         (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) <
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.play();
                         return true;
                     }
-                    else if ((body.Joints[JointType.AnkleLeft].Position.Z > body.Joints[JointType.SpineBase].Position.Z) &&
+                    else if ((body.Joints[JointType.AnkleLeft].Position.Z > body.Joints[JointType.SpineBase].Position.Z + barrier) &&
                         (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) <
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
@@ -125,11 +138,12 @@ namespace GesturalMusic
                     }
                     else
                         return false;
-                else /*if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
+                else if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
                     (body.Joints[JointType.WristRight].Position.Y > body.Joints[JointType.SpineShoulder].Position.Y))
                 {
                     Console.WriteLine("Undo/Clear");
-                }*/
+
+                }
                     return false;
             }
             catch (Exception e)

@@ -395,13 +395,13 @@
                 bool loop;
 
                 // Set arm length if not yet set
-                if (armLength == null && body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
+                if (armLength == 0 && body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
                 {
                     armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
                                 Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
                 }
                 
-                if(armLength == null) {
+                if(armLength == 0) {
                     played = false;
                     loop = false;
                 }
@@ -567,7 +567,7 @@
             PartitionManager.isPartitionSet[number] = true;
             PartitionManager.partitionInstrSetName[number] = instrumentName;
             PartitionManager.val3 = instrumentName;
-            instruments[number] = new Instrument(osc,instrumentName);
+            instruments[number] = new Instrument(oscLocal,instrumentName);
         }
 
         /// <summary>
