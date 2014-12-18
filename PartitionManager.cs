@@ -22,10 +22,10 @@ namespace GesturalMusic
         // Store whether the partitions are set or not
         public static bool[] isPartitionSet = new bool[] {false, false, false, false};
 
-        // Store which instruments the partitions are set with, if set.
-        public static string[] partitionInstrSetName = new string[] { "void", "void", "void", "void" };
-
         public static string val3 = "void";
+
+        // Store which instruments the partitions are set with, if set.
+        public static string[] partitionInstrSetName = new string[] { val3, val3, val3, val3 };
 
         /// <summary>
         /// Get the current partition in which the first tracked body resides in
@@ -83,8 +83,7 @@ namespace GesturalMusic
         {
             currentPartitionType = type;
             isPartitionSet = new bool[] { false, false, false, false };
-            partitionInstrSetName = new string[] { "void", "void", "void", "void" };
-            val3 = "void";
+            partitionInstrSetName = new string[] { val3, val3, val3, val3 };
         }               
     }
 }

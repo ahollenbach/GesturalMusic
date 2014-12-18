@@ -586,7 +586,7 @@
 
                         if (temp != "void")
                         {
-                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);                                                        
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
                         }
                     }
                 }
