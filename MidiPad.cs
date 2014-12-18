@@ -10,7 +10,7 @@ namespace GesturalMusic
 {
     class MidiPad : Instrument
     {
-        private string name;
+        public string name;
 
         private AbletonSliderController pitch;
         private AbletonSliderController velocity;

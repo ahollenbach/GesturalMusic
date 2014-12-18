@@ -16,7 +16,7 @@ namespace GesturalMusic
 
 
 
-        private string name;
+        public string name;
 
         // For rate limiting
         private DateTime lastNotePlayed;

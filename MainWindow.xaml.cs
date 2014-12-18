@@ -469,6 +469,9 @@
                     }
                 }
 
+                // Now draw which partition you're in
+
+
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
             }
@@ -759,7 +762,7 @@
             // the screen for the current partition
             if (PartitionManager.val3 == "void")
             {
-                displaySetConfirmation(drawingContext, "DEFAULT");
+                displaySetConfirmation(drawingContext, instruments[PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position)].name);
             }
             else
             {
@@ -803,40 +806,68 @@
             // AND HandState is closed
             // SELECT current option
 
+            DepthSpacePoint sl = this.coordinateMapper.MapCameraPointToDepthSpace(sLeftc);
+
+            float textXOffset = -10;
+            float textYOffset = -15;
+
+            float i0XOffset = -150;
+            float i0YOffset = -30;
+
+            if (sl.X + i0XOffset < 10)
+            {
+                i0XOffset += Math.Abs(sl.X + i0XOffset + 10);
+            }
+
             if (htLeftc.Y > sLeftc.Y)
             {
                 // Hand at approximately 25 degrees
                 if (angle2 > 20 && angle2 < 30 && body.HandLeftState == HandState.Closed)
                 {
-                    drawingContext.DrawEllipse(Brushes.IndianRed, new Pen(Brushes.MistyRose, 1), new Point(100, 150), 20, 20);
+                    drawingContext.DrawEllipse(Brushes.IndianRed, new Pen(Brushes.MistyRose, 1), new Point(sl.X + i0XOffset, sl.Y + i0YOffset), 20, 20);
                     if (body.HandRightState == HandState.Lasso) return "instr0";
                 }
                 else
                 {
-                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 150), 20, 20);
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(sl.X + i0XOffset, sl.Y + i0YOffset), 20, 20);
                 }
+                drawingContext.DrawText(new FormattedText("i0",CultureInfo.GetCultureInfo("en-us"),
+                                                              FlowDirection.LeftToRight,
+                                                              new Typeface("Verdana"),
+                                                              30, System.Windows.Media.Brushes.Black),
+                                                              new Point(sl.X + i0XOffset + textXOffset, sl.Y + i0YOffset + textYOffset));
 
                 // Hand at approx 45 degrees
                 if (angle2 > 40 && angle2 < 50 && body.HandLeftState == HandState.Closed)
                 {
-                    drawingContext.DrawEllipse(Brushes.RoyalBlue, new Pen(Brushes.RoyalBlue, 1), new Point(100, 100), 20, 20);
+                    drawingContext.DrawEllipse(Brushes.RoyalBlue, new Pen(Brushes.RoyalBlue, 1), new Point(sl.X + i0XOffset + 20, sl.Y + i0YOffset - 40), 20, 20);
                     if (body.HandRightState == HandState.Lasso) return "instr1";
                 }
                 else
                 {
-                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(100, 100), 20, 20);
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(sl.X + i0XOffset + 20, sl.Y + i0YOffset - 40), 20, 20);
                 }
+                drawingContext.DrawText(new FormattedText("i1", CultureInfo.GetCultureInfo("en-us"),
+                                                              FlowDirection.LeftToRight,
+                                                              new Typeface("Verdana"),
+                                                              30, System.Windows.Media.Brushes.Black),
+                                                              new Point(sl.X + i0XOffset + textXOffset + 20, sl.Y + i0YOffset + textYOffset - 40));
 
                 // Hand at approximately 65 degrees
                 if (angle2 > 60 && angle2 < 70 && body.HandLeftState == HandState.Closed)
                 {
-                    drawingContext.DrawEllipse(Brushes.Goldenrod, new Pen(Brushes.SandyBrown, 1), new Point(150, 100), 20, 20);
+                    drawingContext.DrawEllipse(Brushes.Goldenrod, new Pen(Brushes.SandyBrown, 1), new Point(sl.X + i0XOffset + 60, sl.Y + i0YOffset - 60), 20, 20);
                     if (body.HandRightState == HandState.Lasso) return "instr2";
                 }
                 else
                 {
-                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(150, 100), 20, 20);
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(sl.X + i0XOffset + 60, sl.Y + i0YOffset - 60), 20, 20);
                 }
+                drawingContext.DrawText(new FormattedText("i2", CultureInfo.GetCultureInfo("en-us"),
+                                                              FlowDirection.LeftToRight,
+                                                              new Typeface("Verdana"),
+                                                              30, System.Windows.Media.Brushes.Black),
+                                                              new Point(sl.X + i0XOffset + textXOffset + 60, sl.Y + i0YOffset + textYOffset - 60));
 
             }
 
