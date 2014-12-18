@@ -11,7 +11,6 @@ namespace GesturalMusic
     class Instrument
     {
         private string name;
-        private UdpWriter osc;
 
         // For rate limiting
         private DateTime lastNotePlayed;
@@ -21,10 +20,9 @@ namespace GesturalMusic
         HandState handStateLast;
         int lastSemitone;
 
-        public Instrument(UdpWriter osc, string name)
+        public Instrument(string name)
         {
             this.name = name;
-            this.osc = osc;
 
             lastNotePlayed = DateTime.Now;
             handStateLast = HandState.Unknown;
@@ -37,7 +35,7 @@ namespace GesturalMusic
             {
                 Console.WriteLine("Playing: " + this.name + " " + pitch + " " + velocity + " " + duration + " " + midiChannel);
                 OscElement elem = new OscElement("/" + this.name, pitch, velocity, duration, midiChannel);
-                this.osc.Send(elem);
+                MainWindow.osc.Send(elem);
 
                 lastNotePlayed = DateTime.Now;
             }

@@ -17,17 +17,19 @@ namespace GesturalMusic
         //private bool isClear = false;
         //private bool isUndo = false;
         private string name;
-        private UdpWriter oscLoop;
-        private int port = 22344;
-        private string host = "127.0.0.1";
+        private static UdpWriter oscLoop;
         private double barrier = 0.2;
 
-        public LooperOSC(UdpWriter osc1)
+        public LooperOSC()
         {
-            //this.name = 
             Console.WriteLine("Looper constructor");
-            oscLoop = new UdpWriter(host, port);
+            ResetOsc();
 
+        }
+
+        public static void ResetOsc() 
+        {
+            oscLoop = new UdpWriter(MainWindow.oscHost, MainWindow.looperOscPort);
         }
 
         public void record()

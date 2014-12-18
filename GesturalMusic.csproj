@@ -78,7 +78,7 @@
     <Compile Include="Instrument.cs" />
     <Compile Include="KinectStageArea.cs" />
     <Compile Include="LooperOSC.cs" />
-    <Compile Include="MidiDrum.cs" />
+    <Compile Include="MidiPad.cs" />
     <Compile Include="PartitionManager.cs" />
     <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">

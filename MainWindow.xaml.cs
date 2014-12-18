@@ -122,43 +122,28 @@
         private List<Pen> bodyColors;
 
         /// <summary>
-        /// Current status text to display
-        /// </summary>
-        private string statusText = null;
-
-        /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
-        private String oscHost = "129.21.118.93";
+        public static String oscHost = "127.0.0.1";
 
         /// <summary>
-        /// The port to send to: default 9001
+        /// The port to send to: default 22345
         /// </summary>
-        private int oscPort = 22345;
+        private static int oscPort = 22345;
+
+        /// <summary>
+        /// The port to send looper information to: default 22344
+        /// </summary>
+        public static int looperOscPort = 22344;
 
         /// <summary>
         /// Current status text to display
         /// </summary>
-        private UdpWriter osc;
-        private UdpWriter oscLocal;
+        public static UdpWriter osc;
+
         Random r = new Random();
         private DateTime startTime;
         StreamWriter jointDataFile;
-
-
-        /// <summary>
-        /// A dictionary of Ableton slider controllers.
-        /// This will contain elements such as volume and pitch.
-        /// The sliders can be fetched by their name (i.e. "instrument/pitch").
-        /// </summary>
-        Dictionary<string, AbletonSliderController> sliders;
-
-        /// <summary>
-        /// A dictionary of Ableton switch controllers.
-        /// This will contain elements such as play.
-        /// The switches can be fetched by their name (i.e. "instrument/play").
-        /// </summary>
-        Dictionary<string, AbletonSwitchController> switches;
 
         Instrument[] instruments;
         LooperOSC looper;
@@ -180,13 +165,19 @@
             else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
         }
 
+        private void SetRecipient(object sender, RoutedEventArgs e)
+        {
+            oscHost = RecipientIpAddress.Text;
+            Console.WriteLine(oscHost);
+            osc = new UdpWriter(oscHost, oscPort);
+        }
+        /*
         private void SendMessage(object sender, RoutedEventArgs e)
         {
-
             //OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
             OscElement elem2 = new OscElement("/Looper/0/State", "Record");
-            oscLocal.Send(elem2);
-        }
+            osc.Send(elem2);
+        }*/
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -201,21 +192,19 @@
             // Set up OSC
             ///////////////////////////////////////////////////////////////////////
             osc = new UdpWriter(oscHost, oscPort);
-            oscLocal = new UdpWriter("127.0.0.1", 22345);
 
-            ///////////////////////////////////////////////////////////////////////
-            // Initialize Ableton controllers
-            ///////////////////////////////////////////////////////////////////////
+
             //Looper
-            looper = new LooperOSC(oscLocal); ;
-            ///////////////////////////////////////////////////////////////////////
+            looper = new LooperOSC();
+
             // Instruments
             instruments = new Instrument[4];
 
             for (int i = 0; i < instruments.Length; i++)
             {
-                instruments[i] = new Instrument(oscLocal, "instr" + i);
+                instruments[i] = new Instrument("instr" + i);
             }
+            instruments[2] = new Instrument("pad0");
 
 
             ///////////////////////////////////////////////////////////////////////
@@ -567,7 +556,7 @@
             PartitionManager.isPartitionSet[number] = true;
             PartitionManager.partitionInstrSetName[number] = instrumentName;
             PartitionManager.val3 = instrumentName;
-            instruments[number] = new Instrument(oscLocal,instrumentName);
+            instruments[number] = new Instrument(instrumentName);
         }
 
         /// <summary>

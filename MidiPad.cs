@@ -11,7 +11,6 @@ namespace GesturalMusic
     class MidiPad : Instrument
     {
         private string name;
-        private UdpWriter osc;
 
         private AbletonSliderController pitch;
         private AbletonSliderController velocity;
@@ -27,15 +26,14 @@ namespace GesturalMusic
         private Joint rWristLocationLast;
         private DateTime lastFrame;
 
-        public MidiPad(UdpWriter osc, string name) : base(osc, name)
+        public MidiPad(string name) : base(name)
         {
             
             this.name = name;
-            this.osc = osc;
 
-            pitch = new AbletonSliderController(osc, this.name + "/pitch", 0, 127, false);
-            velocity = new AbletonSliderController(osc, this.name + "/velocity", 0, 127, false);
-            noteOn = new AbletonSwitchController(osc, this.name + "/noteOn");
+            pitch = new AbletonSliderController(MainWindow.osc, this.name + "/pitch", 0, 127, false);
+            velocity = new AbletonSliderController(MainWindow.osc, this.name + "/velocity", 0, 127, false);
+            noteOn = new AbletonSwitchController(MainWindow.osc, this.name + "/noteOn");
 
             lastNotePlayed = DateTime.Now;
 
