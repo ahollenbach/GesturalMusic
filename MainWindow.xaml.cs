@@ -768,6 +768,18 @@
             {
                 displaySetConfirmation(drawingContext, "SET " + PartitionManager.val3);
             }
+
+            // display current location
+            drawingContext.DrawRectangle(
+                    Brushes.DarkGray,
+                    null,
+                    new Rect(this.displayWidth / 2 - 30, 0, 60, 20));
+            String curPartition = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position).ToString();
+            drawingContext.DrawText(new FormattedText(curPartition, CultureInfo.GetCultureInfo("en-us"),
+                                                              FlowDirection.LeftToRight,
+                                                              new Typeface("Verdana"),
+                                                              18, System.Windows.Media.Brushes.Black),
+                                                              new Point(this.displayWidth / 2 - 10, 1));
         }
 
         /// <summary>
