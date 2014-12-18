@@ -8,7 +8,7 @@ using Ventuz.OSC;
 
 namespace GesturalMusic
 {
-    class MidiDrum : Instrument
+    class MidiPad : Instrument
     {
         private string name;
         private UdpWriter osc;
@@ -27,7 +27,7 @@ namespace GesturalMusic
         private Joint rWristLocationLast;
         private DateTime lastFrame;
 
-        public MidiDrum(UdpWriter osc, string name) : base(osc, name)
+        public MidiPad(UdpWriter osc, string name) : base(osc, name)
         {
             
             this.name = name;
