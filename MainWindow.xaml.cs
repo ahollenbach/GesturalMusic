@@ -756,11 +756,11 @@
                 }
             }
 
-            // Display "UNSET" or "SET INSTRUMENT_NAME" at the top right corner of
+            // Display "DEFAULT" or "SET INSTRUMENT_NAME" at the top right corner of
             // the screen for the current partition
             if (PartitionManager.val3 == "void")
             {
-                displaySetConfirmation(drawingContext, "UNSET");
+                displaySetConfirmation(drawingContext, "DEFAULT");
             }
             else
             {
