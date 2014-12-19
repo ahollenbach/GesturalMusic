@@ -15,8 +15,8 @@ namespace GesturalMusic
         public readonly static String INSTRUMENT = "Instrument";
 
 
-
         public string name;
+        private Filter filter;
 
         // For rate limiting
         private DateTime lastNotePlayed;
@@ -29,6 +29,7 @@ namespace GesturalMusic
         public Instrument(string name)
         {
             this.name = name;
+            filter = new Filter(this.name);
 
             lastNotePlayed = DateTime.Now;
             handStateLast = HandState.Unknown;
@@ -58,6 +59,9 @@ namespace GesturalMusic
         }
         public bool CheckAndPlayNote(Body body)
         {
+            // first thing, send filters
+            filter.SendFilterData(body);
+
             double rightThreshold = 0.2;
             double leftThreshold = 0.1;
 

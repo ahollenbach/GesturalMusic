@@ -204,7 +204,7 @@
             {
                 instruments[i] = new Instrument("instr" + i);
             }
-            instruments[2] = new MidiPad("pad0");
+            //instruments[2] = new MidiPad("pad0");
 
 
             ///////////////////////////////////////////////////////////////////////
