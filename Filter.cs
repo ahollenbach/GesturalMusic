@@ -27,14 +27,11 @@ namespace GesturalMusic
             double xDist = rWrist.X - rShoulder.X;
             double yDist = rWrist.Y - head.Y;
 
-            // .13 -> .4 ( roughly .25)
-            // .25 ( .13/.25 ~= 0.5)
-
-            // .88 / .58 / -.15   (.3, .75)
-            Console.WriteLine(Math.Pow(1 + head.Y - 3 * forearmLength + yDist, .3));
+            float zLocation = Utils.Clamp(0,1,(float)((head.Z - 2) / 4.5));
+            Console.WriteLine(zLocation);
             MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterX", (float) ((xDist - .5 * forearmLength) * 4)));
             MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterY", (float) Math.Pow(1 + head.Y - 3 * forearmLength + yDist, 0.3)));
-            MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterZ", rShoulder.Z - rWrist.Z));
+            MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterZ", 1 - zLocation));
         }
     }
 }

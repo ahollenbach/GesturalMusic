@@ -28,7 +28,7 @@
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Header="Set Recipient"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,104,0,573" Width="129">
+        <GroupBox Header="Set Recipient"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,104,0,550" Width="129">
             <StackPanel Margin="0,0,-0.2,-0.4">
                 <TextBox x:Name="RecipientIpAddress" TextWrapping="Wrap" Text="127.0.0.1" />
                 <Button x:Name="SetRecipientButton" Content="Set!" Click="SetRecipient"/>
@@ -42,7 +42,7 @@
         <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem />
         </StatusBar>
-        <GroupBox Header="Set Mode"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,171,0,514" Width="129">
+        <GroupBox Header="Set Mode"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,194,0,476" Width="129">
             <StackPanel Margin="0,0,-0.2,-0.4">
                 <RadioButton x:Name="AdvancedMode" Content="Advanced Mode" IsChecked="True" Checked="SetMode"/>
                 <RadioButton x:Name="DemoMode" Content="Demo Mode" Checked="SetMode"/>

@@ -176,8 +176,8 @@
             osc = new UdpWriter(oscHost, oscPort);
 
             // Save in settings
-            UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
-            UserSettings.Default.Save();
+            //UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
+            //UserSettings.Default.Save();
         }
         private void SetMode(object sender, RoutedEventArgs e)
         {
