@@ -880,7 +880,23 @@
                                                               new Typeface("Verdana"),
                                                               30, System.Windows.Media.Brushes.Black),
                                                               new Point(sl.X + i0XOffset + textXOffset + 60, sl.Y + i0YOffset + textYOffset - 60));
+                // hAND AT APPROX 85
+                if (angle2 > 80 && angle2 < 90 && body.HandLeftState == HandState.Closed)
+                {
+                    drawingContext.DrawEllipse(Brushes.Ivory, new Pen(Brushes.SandyBrown, 1), new Point(sl.X + i0XOffset + 100, sl.Y + i0YOffset - 70), 20, 20);
+                    if (body.HandRightState == HandState.Lasso) return "instr3";
+                }
+                else
+                {
+                    drawingContext.DrawEllipse(Brushes.White, new Pen(Brushes.White, 1), new Point(sl.X + i0XOffset + 100, sl.Y + i0YOffset - 70), 20, 20);
+                }
+                drawingContext.DrawText(new FormattedText("i3", CultureInfo.GetCultureInfo("en-us"),
+                                                              FlowDirection.LeftToRight,
+                                                              new Typeface("Verdana"),
+                                                              30, System.Windows.Media.Brushes.Black),
+                                                              new Point(sl.X + i0XOffset + textXOffset + 100, sl.Y + i0YOffset + textYOffset - 70));
 
+                
             }
 
             return "void";
