@@ -170,6 +170,10 @@
             oscHost = RecipientIpAddress.Text;
             Console.WriteLine(oscHost);
             osc = new UdpWriter(oscHost, oscPort);
+
+            // Save in settings
+            UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
+            UserSettings.Default.Save();
         }
         /*
         private void SendMessage(object sender, RoutedEventArgs e)
@@ -187,6 +191,16 @@
             // Get the reference time
             startTime = DateTime.Now;
             jointDataFile = new StreamWriter("jointOutput.csv", true);
+
+            // initialize WPF
+            try
+            {
+                RecipientIpAddress.Text = UserSettings.Default.RecipientIpAddress;
+            }
+            catch (NullReferenceException e)
+            {
+                Console.WriteLine("IP settings not initialized!");
+            }
 
             ///////////////////////////////////////////////////////////////////////
             // Set up OSC
