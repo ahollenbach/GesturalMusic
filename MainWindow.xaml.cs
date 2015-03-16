@@ -150,6 +150,10 @@
 
         public static double armLength;
 
+        public readonly static String ADVANCED_MODE = "Advanced";
+        public readonly static String DEMO_MODE = "Demo";
+        public static String playingMode;
+
         /// <summary>
         /// Set the number of partitions 
         /// 
@@ -174,6 +178,10 @@
             // Save in settings
             UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
             UserSettings.Default.Save();
+        }
+        private void SetMode(object sender, RoutedEventArgs e)
+        {
+            playingMode = AdvancedMode.IsChecked.GetValueOrDefault() ? ADVANCED_MODE : DEMO_MODE;
         }
         /*
         private void SendMessage(object sender, RoutedEventArgs e)
