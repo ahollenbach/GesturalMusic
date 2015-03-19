@@ -75,6 +75,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DemoInstrument.cs" />
     <Compile Include="FlatColors.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="Instrument.cs" />

@@ -10,11 +10,6 @@ namespace GesturalMusic
 {
     class Instrument
     {
-        // for different types
-        public readonly static String PAD        = "Pad";
-        public readonly static String INSTRUMENT = "Instrument";
-
-
         public string name;
         private Filter filter;
 
@@ -36,27 +31,13 @@ namespace GesturalMusic
             lastSemitone = -1;
         }
 
-        public String GetInstrumentType()
-        {
-            if (this.name.Contains("pad"))
-            {
-                return Instrument.PAD;
-            }
-
-            return Instrument.INSTRUMENT;
-        }
-
-        public void PlayNote(float pitch, int octave)
+        public void PlayNote(int pitch, int velocity = 127, int duration = 500, int midiChannel = 1)
         {
             if (lastNotePlayed + rateLimit <= DateTime.Now)
             {
-                Console.WriteLine("Playing: " + this.name + " " + pitch + " " + octave);
-                OscElement pitchElem = new OscElement("/" + this.name + "/pitch", pitch);
-                OscElement octaveElem = new OscElement("/" + this.name + "/octave", octave);
-                MainWindow.osc.Send(pitchElem);
-                MainWindow.osc.Send(octaveElem);
-
-                
+                Console.WriteLine("Playing: " + this.name + " " + pitch + " " + velocity + " " + duration + " " + midiChannel);
+                OscElement elem = new OscElement("/" + this.name, pitch, velocity, duration, midiChannel);
+                MainWindow.osc.Send(elem);
 
                 lastNotePlayed = DateTime.Now;
             }
@@ -70,7 +51,7 @@ namespace GesturalMusic
             double leftThreshold = 0.1;
 
             // We're trying to play a MIDI instrument
-            if (body.HandLeftState == HandState.Open)
+            if (body.HandRightState == HandState.Closed)
             {
                 //////////////////////////////////////////////////////////////
                 // Semitone
@@ -82,8 +63,23 @@ namespace GesturalMusic
                 // Base our measurements off the wrist location
                 double pos = body.Joints[JointType.WristLeft].Position.X;
 
-                float percentage = (float)Utils.Clamp(0,1,(float)((pos - leftMax) / (rightMax - leftMax)));
+                double percentage = (pos - leftMax) / (rightMax - leftMax);
 
+                int semitone = 0;
+                try
+                {
+                    semitone = getSemitone(percentage, body.HandLeftState);
+                    if (semitone == -1)
+                    {
+                        // This is the E# (the one black key that we don't want to play)
+                        return false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Problem getting the note (maybe the hand state wasn't good?), so do nothing
+                    return false;
+                }
 
                 //////////////////////////////////////////////////////////////
                 // Octave
@@ -113,14 +109,74 @@ namespace GesturalMusic
                 // Scale octave to 12 semitones per octave
                 int octave = (userOctave + baseOctave) * 12;
 
+
                 //////////////////////////////////////////////////////////////
                 // Send
                 //////////////////////////////////////////////////////////////
-                this.PlayNote(percentage, octave);
+                if (body.HandRightState == handStateLast && semitone == lastSemitone)
+                {
+                    // for now, only play notes if the previous state was not this one.
+                    return false;
+                }
+                handStateLast = body.HandRightState;
+                lastSemitone = semitone;
+
+                int pitch = octave + semitone;
+
+                // Send a note
+                this.PlayNote(pitch);
 
                 return true;
             }
+            handStateLast = body.HandRightState;
             return false;
+        }
+
+        private int getSemitone(double percentage, HandState handState)
+        {
+            List<Tuple<double, int>> semitoneRanges;
+
+            if (handState == HandState.Closed)
+            {
+                // black semitones (minimums)
+                semitoneRanges = new List<Tuple<double, int>>
+                {
+                    Tuple.Create(0.0  ,  1),
+                    Tuple.Create(1.5/7,  3),
+                    Tuple.Create(2.5/7, -1),
+                    Tuple.Create(3.5/7,  6),
+                    Tuple.Create(4.5/7,  8),
+                    Tuple.Create(5.5/7, 10)
+                };
+            }
+            else if (handState == HandState.Open)
+            {
+                // white semitones (minimums)
+                semitoneRanges = new List<Tuple<double, int>>
+                {
+                    Tuple.Create(0.0  ,  0),
+                    Tuple.Create(1.0/7,  2),
+                    Tuple.Create(2.0/7,  4),
+                    Tuple.Create(3.0/7,  5),
+                    Tuple.Create(4.0/7,  7),
+                    Tuple.Create(5.0/7,  9),
+                    Tuple.Create(6.0/7, 11)
+                };
+            }
+            else
+            {
+                // Console.WriteLine("Left hand not open or closed.");
+                throw new Exception();
+            }
+
+            for (int i = semitoneRanges.Count - 1; i >= 0; i--)
+            {
+                if (percentage > semitoneRanges[i].Item1)
+                {
+                    return semitoneRanges[i].Item2;
+                }
+            }
+            return semitoneRanges[0].Item2;
         }
     }
 }

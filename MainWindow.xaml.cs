@@ -189,6 +189,7 @@
                 {
                     PartitionRadio.Children[i].IsEnabled = true;
                 }
+                instruments[0] = new Instrument("instr0");
             }
             else
             {
@@ -201,7 +202,7 @@
                 {
                     PartitionRadio.Children[i].IsEnabled = false;
                 }
-
+                instruments[0] = new DemoInstrument("instr0");
             }
         }
 
@@ -526,11 +527,18 @@
 
             // Ask the instrument if it wants to play
             Instrument instrument = instruments[partition];
-            if (instrument.GetInstrumentType() == Instrument.PAD)
+            Console.WriteLine(instrument.ToString());
+            if (instrument.ToString() == "MidiPad")
             {
                 MidiPad pad = (MidiPad)instruments[partition];
 
                 return pad.CheckAndPlayNote(body);
+            }
+            else if (instrument.ToString() == "DemoInstrument")
+            {
+                DemoInstrument demoInstr = (DemoInstrument)instruments[partition];
+
+                return demoInstr.CheckAndPlayNoteD(body);
             }
             else
             {
