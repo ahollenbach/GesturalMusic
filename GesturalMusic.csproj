@@ -75,6 +75,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FlatColors.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="Instrument.cs" />
     <Compile Include="KinectStageArea.cs" />

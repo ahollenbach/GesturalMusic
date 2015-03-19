@@ -44,32 +44,32 @@
         /// <summary>
         /// Brush used for drawing hands that are currently tracked as closed
         /// </summary>
-        private readonly Brush handClosedBrush = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0));
+        private readonly Brush handClosedBrush = FlatColors.Translucent(FlatColors.LIGHT_RED);
 
         /// <summary>
         /// Brush used for drawing hands that are currently tracked as opened
         /// </summary>
-        private readonly Brush handOpenBrush = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0));
+        private readonly Brush handOpenBrush = FlatColors.Translucent(FlatColors.LIGHT_GREEN);
 
         /// <summary>
         /// Brush used for drawing hands that are currently tracked as in lasso (pointer) position
         /// </summary>
-        private readonly Brush handLassoBrush = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255));
+        private readonly Brush handLassoBrush = FlatColors.Translucent(FlatColors.LIGHT_BLUE);
 
         /// <summary>
         /// Brush used for drawing joints that are currently tracked
         /// </summary>
-        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
+        private readonly Brush trackedJointBrush = FlatColors.WHITE;
 
         /// <summary>
         /// Brush used for drawing joints that are currently inferred
         /// </summary>        
-        private readonly Brush inferredJointBrush = Brushes.Yellow;
+        private readonly Brush inferredJointBrush = FlatColors.YELLOW;
 
         /// <summary>
         /// Pen used for drawing bones that are currently inferred
         /// </summary>        
-        private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
+        private readonly Pen inferredBonePen = new Pen(FlatColors.LIGHT_GRAY, 1);
 
         /// <summary>
         /// Drawing group for body rendering output
@@ -117,11 +117,6 @@
         private int displayHeight;
 
         /// <summary>
-        /// List of colors for each body tracked
-        /// </summary>
-        private List<Pen> bodyColors;
-
-        /// <summary>
         /// The host ip address (the computer with Ableton + Max for Live on it). Default: "127.0.0.1"
         /// </summary>
         public static String oscHost = "127.0.0.1";
@@ -155,8 +150,7 @@
         public static String playingMode;
 
         /// <summary>
-        /// Set the number of partitions 
-        /// 
+        /// Set the number of partitions
         /// </summary>
         /// 
         /// <param name="sender">object sending the event</param>
@@ -179,17 +173,16 @@
             //UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
             //UserSettings.Default.Save();
         }
+
+        /// <summary>
+        /// Sets the playing mode
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SetMode(object sender, RoutedEventArgs e)
         {
             playingMode = AdvancedMode.IsChecked.GetValueOrDefault() ? ADVANCED_MODE : DEMO_MODE;
         }
-        /*
-        private void SendMessage(object sender, RoutedEventArgs e)
-        {
-            //OscElement elem2 = new OscElement("/instr0", 64, 50, 300, 1);
-            OscElement elem2 = new OscElement("/Looper/0/State", "Record");
-            osc.Send(elem2);
-        }*/
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -215,7 +208,6 @@
             ///////////////////////////////////////////////////////////////////////
             osc = new UdpWriter(oscHost, oscPort);
 
-
             //Looper
             looper = new LooperOSC();
 
@@ -226,7 +218,6 @@
             {
                 instruments[i] = new Instrument("instr" + i);
             }
-            //instruments[2] = new MidiPad("pad0");
 
 
             ///////////////////////////////////////////////////////////////////////
@@ -283,16 +274,6 @@
             this.bones.Add(new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft));
             this.bones.Add(new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft));
             this.bones.Add(new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft));
-
-            // populate body colors, one for each BodyIndex
-            this.bodyColors = new List<Pen>();
-
-            this.bodyColors.Add(new Pen(Brushes.Red, 6));
-            this.bodyColors.Add(new Pen(Brushes.Orange, 6));
-            this.bodyColors.Add(new Pen(Brushes.Green, 6));
-            this.bodyColors.Add(new Pen(Brushes.Blue, 6));
-            this.bodyColors.Add(new Pen(Brushes.Indigo, 6));
-            this.bodyColors.Add(new Pen(Brushes.Violet, 6));
 
             // open the sensor
             this.kinectSensor.Open();
@@ -387,7 +368,7 @@
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
 
-                    // do stuff
+                    // Run the core body analysis routine 
                     Update();
                 }
             }
@@ -395,8 +376,6 @@
 
         private void Update()
         {
-            SolidColorBrush bgColor;
-
             // Selects the first body that is tracked and use that for our calculations
             Body body = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
 
@@ -421,26 +400,6 @@
                     played = SendInstrumentData(body);
                     loop = ActivateLooper(body);
                 }
-
-                // Set the background color according to a few things
-
-                // If we detect either a trigger to start or stop the track, change the background color
-                if (played)
-                {
-                    bgColor = Brushes.LightGray;
-                }
-                else if (body.Joints[JointType.SpineMid].Position.Z > KinectStageArea.GetCenterZ())
-                {
-                    bgColor = Brushes.DarkBlue;
-                }
-                else
-                {
-                    bgColor = Brushes.Black;
-                }
-            }
-            else
-            {
-                bgColor = Brushes.Black;
             }
 
             ///////////////////////////////////////////////////////////////////////
@@ -448,16 +407,21 @@
             ///////////////////////////////////////////////////////////////////////
             using (DrawingContext dc = this.drawingGroup.Open())
             {
-                dc.DrawRectangle(bgColor, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                if (body == null)
+                {
+                    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                    return;
+                }
+
+                dc.DrawRectangle(FlatColors.DARK_BLUEGRAY, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                 // Crosshairs so the user can know where positive/negative are for each limb
                 // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
                 // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
 
-                int penIndex = 0;
                 foreach (Body b in this.bodies)
                 {
-                    Pen drawPen = this.bodyColors[penIndex++];
+                    Pen drawPen = new Pen(FlatColors.WHITE,7);
 
                     if (b.IsTracked)
                     {
@@ -488,6 +452,9 @@
 
                         this.DrawHand(b.HandLeftState, jointPoints[JointType.HandLeft], dc);
                         this.DrawHand(b.HandRightState, jointPoints[JointType.HandRight], dc);
+
+                        // after the first, the rest are darkened a bit (to signify not tracked)
+                        drawPen = new Pen(FlatColors.LIGHT_GRAY, 7);
                     }
                 }
 
