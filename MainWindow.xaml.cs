@@ -398,7 +398,7 @@
                 else
                 {
                     played = SendInstrumentData(body);
-                    loop = ActivateLooper(body);
+                    loop = looper.SendLooperData(body);
                 }
             }
 
@@ -466,16 +466,6 @@
             }
         }
 
-        private bool ActivateLooper(Body body)
-        {
-            if (looper.LooperControl(body))
-            {
-                return true;
-            }
-            return false;
-        }
-
-
         /// <summary>
         /// Sends OSC messages if applicable
         /// </summary>
@@ -511,17 +501,12 @@
             {
                 MidiPad pad = (MidiPad)instruments[partition];
 
-                if (pad.CheckAndPlayNote(body))
-                {
-                    return true;
-                }
-                return false;
+                return pad.CheckAndPlayNote(body);
             }
-            if (instrument.CheckAndPlayNote(body))
+            else
             {
-                return true;
+                return instrument.CheckAndPlayNote(body);
             }
-            return false;
         }
 
         /// <summary>

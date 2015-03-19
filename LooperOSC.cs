@@ -104,7 +104,7 @@ namespace GesturalMusic
             oscLoop.Send(o);
              */
         }
-        public bool LooperControl(Body body)
+        public bool SendLooperData(Body body)
         {
             try
             {
