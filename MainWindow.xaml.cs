@@ -181,7 +181,28 @@
         /// <param name="e"></param>
         private void SetMode(object sender, RoutedEventArgs e)
         {
-            playingMode = AdvancedMode.IsChecked.GetValueOrDefault() ? ADVANCED_MODE : DEMO_MODE;
+            if (AdvancedMode.IsChecked.GetValueOrDefault())
+            {
+                playingMode = ADVANCED_MODE;
+
+                for (int i = 1; i < PartitionRadio.Children.Count; i++)
+                {
+                    PartitionRadio.Children[i].IsEnabled = true;
+                }
+            }
+            else
+            {
+                playingMode = DEMO_MODE;
+
+                PartitionManager.SetPartitionType(PartitionType.Single);
+                onePartition.IsChecked = true;
+
+                for (int i = 1; i < PartitionRadio.Children.Count; i++)
+                {
+                    PartitionRadio.Children[i].IsEnabled = false;
+                }
+
+            }
         }
 
         /// <summary>
@@ -445,9 +466,17 @@
                             DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
                             jointPoints[jointType] = new Point(depthSpacePoint.X, depthSpacePoint.Y);
                         }
+
+                        if (MainWindow.playingMode == MainWindow.ADVANCED_MODE)
+                        {
+                            this.decidePartitionToBeChecked(b, joints, jointPoints, dc);
+                            //this.InstrumentSelect(b, joints, jointPoints, dc );
+                        }
+                        else
+                        {
+                            this.displayDemoHud(b, joints, jointPoints, dc);
+                        }
                         
-                        this.decidePartitionToBeChecked(b, joints, jointPoints, dc);
-                        //this.InstrumentSelect(b, joints, jointPoints, dc );
                         this.DrawBody(joints, jointPoints, dc, drawPen);
 
                         this.DrawHand(b.HandLeftState, jointPoints[JointType.HandLeft], dc);
@@ -544,6 +573,11 @@
             PartitionManager.partitionInstrSetName[number] = instrumentName;
             PartitionManager.val3 = instrumentName;
             instruments[number] = new Instrument(instrumentName);
+        }
+
+        private void displayDemoHud(Body b, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
+        {
+            // do nothing for now
         }
 
         /// <summary>

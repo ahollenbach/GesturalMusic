@@ -20,7 +20,7 @@
 
 
         <GroupBox Header="Number of Partitions"  Grid.Row="1" HorizontalAlignment="Left" Margin="0,0,0,636">
-            <StackPanel Margin="0,0,-0.2,-0.4">
+            <StackPanel Margin="0,0,-0.2,-0.4" Name="PartitionRadio">
                 <RadioButton Name="onePartition" Content="One" IsChecked="True" Checked="SetNumPartitions"/>
                 <RadioButton Name="twoPartitionLR" Content="Two (L/R)" Checked="SetNumPartitions"/>
                 <RadioButton Name="twoPartitionFB" Content="Two (F/B)" Checked="SetNumPartitions"/>
