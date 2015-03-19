@@ -12,6 +12,12 @@ namespace GesturalMusic
     {
         private String instrumentName;
 
+        /** 
+         * Filters
+         * 
+         * Currently set up so that X,Y follow the wrist location relative to the body,
+         * while Z tracks the full body relative to the Kinect.
+         * */
         public Filter(String instrumentName)
         {
             this.instrumentName = instrumentName;
@@ -28,7 +34,6 @@ namespace GesturalMusic
             double yDist = rWrist.Y - head.Y;
 
             float zLocation = Utils.Clamp(0,1,(float)((head.Z - 2) / 4.5));
-            Console.WriteLine(zLocation);
             MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterX", (float) ((xDist - .5 * forearmLength) * 4)));
             MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterY", (float) Math.Pow(1 + head.Y - 3 * forearmLength + yDist, 0.3)));
             MainWindow.osc.Send(new OscElement("/" + instrumentName + "/filterZ", 1 - zLocation));
