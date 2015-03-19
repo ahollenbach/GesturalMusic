@@ -9,13 +9,18 @@ namespace GesturalMusic
 {
     class FlatColors
     {
-        public readonly static SolidColorBrush DARK_BLUEGRAY = new SolidColorBrush(Color.FromRgb(44, 62, 80));
-        public readonly static SolidColorBrush WHITE = new SolidColorBrush(Color.FromRgb(236, 240, 241));
+        public readonly static SolidColorBrush WHITE      = new SolidColorBrush(Color.FromRgb(236, 240, 241));
+        public readonly static SolidColorBrush DARK_WHITE = new SolidColorBrush(Color.FromRgb(189, 195, 199));
         public readonly static SolidColorBrush LIGHT_GRAY = new SolidColorBrush(Color.FromRgb(149, 165, 166));
-        public readonly static SolidColorBrush LIGHT_BLUE = new SolidColorBrush(Color.FromRgb(52, 152, 219));
-        public readonly static SolidColorBrush LIGHT_RED = new SolidColorBrush(Color.FromRgb(231, 76, 60));
+        public readonly static SolidColorBrush DARK_GRAY  = new SolidColorBrush(Color.FromRgb(127, 140, 141));
+
+
+        public readonly static SolidColorBrush LIGHT_BLUE  = new SolidColorBrush(Color.FromRgb(52, 152, 219));
+        public readonly static SolidColorBrush LIGHT_RED   = new SolidColorBrush(Color.FromRgb(231, 76, 60));
         public readonly static SolidColorBrush LIGHT_GREEN = new SolidColorBrush(Color.FromRgb(46, 204, 113));
-        public readonly static SolidColorBrush YELLOW = new SolidColorBrush(Color.FromRgb(241, 196, 15));
+        public readonly static SolidColorBrush YELLOW      = new SolidColorBrush(Color.FromRgb(241, 196, 15));
+
+        public readonly static SolidColorBrush DARK_BLUEGRAY = new SolidColorBrush(Color.FromRgb(44, 62, 80));
 
         /**
          * Takes in a color brush and returns a slightly translucent version of it. 
