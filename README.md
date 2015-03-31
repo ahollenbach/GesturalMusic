@@ -31,3 +31,6 @@ The [test project](Other/test Project/test.als) should be configured and ready t
 4. Controls
 --------------------
 Before you start playing, you need to set a baseline for your arm length. Reach out horizontally with both arms and make the *Lasso* handshape.
+
+
+*For more information, please see the Documentation folder. Note that this project is currently undergoing major changes and this information may be out of date.*
