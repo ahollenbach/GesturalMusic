@@ -20,7 +20,8 @@ namespace GesturalMusic
         public readonly static SolidColorBrush LIGHT_GREEN = new SolidColorBrush(Color.FromRgb(46, 204, 113));
         public readonly static SolidColorBrush YELLOW      = new SolidColorBrush(Color.FromRgb(241, 196, 15));
 
-        public readonly static SolidColorBrush DARK_BLUEGRAY = new SolidColorBrush(Color.FromRgb(44, 62, 80));
+        public readonly static SolidColorBrush DARK_BLUEGRAY  = new SolidColorBrush(Color.FromRgb(44, 62, 80));
+        public readonly static SolidColorBrush MIDNIGHT_BLACK = new SolidColorBrush(Color.FromRgb(0, 0, 0));
 
         /**
          * Takes in a color brush and returns a slightly translucent version of it. 

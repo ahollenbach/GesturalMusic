@@ -78,6 +78,10 @@
     <Compile Include="DemoInstrument.cs" />
     <Compile Include="FlatColors.cs" />
     <Compile Include="Filter.cs" />
+    <Compile Include="Floor.cs" />
+    <Compile Include="FloorWindow.xaml.cs">
+      <DependentUpon>FloorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Instrument.cs" />
     <Compile Include="KinectStageArea.cs" />
     <Compile Include="LooperOSC.cs" />
@@ -90,6 +94,10 @@
       <DependentUpon>UserSettings.settings</DependentUpon>
     </Compile>
     <Compile Include="Utils.cs" />
+    <Page Include="FloorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

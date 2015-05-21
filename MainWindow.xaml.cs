@@ -21,6 +21,8 @@
     {
         string val1 = "void";
 
+        public readonly static String FONT_FAMILY = "Verdana";
+
         /// <summary>
         /// Radius of drawn hand circles
         /// </summary>
@@ -140,7 +142,7 @@
         private DateTime startTime;
         StreamWriter jointDataFile;
 
-        Instrument[] instruments;
+        private Instrument[] instruments;
         LooperOSC looper;
 
         public static double armLength;
@@ -148,6 +150,8 @@
         public readonly static String ADVANCED_MODE = "Advanced";
         public readonly static String DEMO_MODE = "Demo";
         public static String playingMode;
+
+        FloorWindow floorWindow;
 
         /// <summary>
         /// Set the number of partitions
@@ -161,6 +165,22 @@
             else if (twoPartitionLR.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleLeftRight);
             else if (twoPartitionFB.IsChecked.GetValueOrDefault()) PartitionManager.SetPartitionType(PartitionType.DoubleFrontBack);
             else if (quadPartition.IsChecked.GetValueOrDefault())  PartitionManager.SetPartitionType(PartitionType.Quad);
+        }
+
+        /// <summary>
+        /// Launch projector screen
+        /// </summary>
+        /// 
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void LaunchProjectorScreen(object sender, RoutedEventArgs e)
+        {
+            if (floorWindow == null)
+            {
+                floorWindow = new FloorWindow(this.displayWidth, this.displayHeight);
+                floorWindow.Show();
+            }
+               
         }
 
         private void SetRecipient(object sender, RoutedEventArgs e)
@@ -391,12 +411,12 @@
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
 
                     // Run the core body analysis routine 
-                    Update();
+                    Update(bodyFrame);
                 }
             }
         }
 
-        private void Update()
+        private void Update(BodyFrame bodyFrame)
         {
             // Selects the first body that is tracked and use that for our calculations
             Body body = System.Linq.Enumerable.FirstOrDefault(this.bodies, bod => bod.IsTracked);
@@ -407,11 +427,11 @@
                 bool loop;
 
                 // Set arm length if not yet set
-                if (armLength == 0 && body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
-                {
-                    armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
-                                Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
-                }
+                //if (armLength == 0 && body.HandLeftState == HandState.Lasso && body.HandRightState == HandState.Lasso)
+                //{
+                //    armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
+                //                Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
+                //}
                 
                 if(armLength == 0) {
                     played = false;
@@ -432,14 +452,24 @@
                 if (body == null)
                 {
                     dc.DrawRectangle(FlatColors.WHITE, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+
+                    // Draw our floor
+                    if (floorWindow != null) floorWindow.Draw(-1, new String[4]);
                     return;
                 }
 
+                // calculate the arm length
+                armLength = Utils.Length(body.Joints[JointType.ShoulderLeft], body.Joints[JointType.ElbowLeft]) +
+                                Utils.Length(body.Joints[JointType.ElbowLeft], body.Joints[JointType.WristLeft]);
+
                 dc.DrawRectangle(FlatColors.DARK_BLUEGRAY, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
-                // Crosshairs so the user can know where positive/negative are for each limb
-                // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(this.displayWidth / 2, 0.0), new Point(this.displayWidth / 2, this.displayHeight));
-                // dc.DrawLine(new Pen(Brushes.Red, 2.0), new Point(0.0, this.displayHeight / 2), new Point(this.displayWidth, this.displayHeight / 2));
+                //Vector4 floor = bodyFrame.FloorClipPlane;
+                //Console.WriteLine("FloorClipPlane");
+                //Console.WriteLine(floor.X + " " + floor.Y + " " + floor.Z + " " + floor.W);
+                //Console.WriteLine("FloorClipPlane");
+
+                //DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(floor);
 
                 foreach (Body b in this.bodies)
                 {
@@ -488,11 +518,19 @@
                     }
                 }
 
-                // Now draw which partition you're in
-
-
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+            }
+
+            if (floorWindow != null)
+            {
+                // do this because vs is being stupid
+                String[] names = new String[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    names[i] = instruments[i].name;
+                }
+                floorWindow.Draw(PartitionManager.GetPartition(body.Joints[JointType.SpineMid].Position), names);
             }
         }
 
@@ -534,7 +572,7 @@
 
                 return pad.CheckAndPlayNote(body);
             }
-            else if (instrument.ToString() == "DemoInstrument")
+            else if (playingMode == DEMO_MODE)
             {
                 DemoInstrument demoInstr = (DemoInstrument)instruments[partition];
 
@@ -782,7 +820,7 @@
             }
             else
             {
-                displaySetConfirmation(drawingContext, "SET " + PartitionManager.val3);
+                displaySetConfirmation(drawingContext, PartitionManager.val3);
             }
 
             // display current location
@@ -793,7 +831,7 @@
             String curPartition = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position).ToString();
             drawingContext.DrawText(new FormattedText(curPartition, CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
-                                                              new Typeface("Verdana"),
+                                                              new Typeface(MainWindow.FONT_FAMILY),
                                                               18, System.Windows.Media.Brushes.Black),
                                                               new Point(this.displayWidth / 2 - 10, 1));
         }
@@ -861,7 +899,7 @@
                 }
                 drawingContext.DrawText(new FormattedText("i0",CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
-                                                              new Typeface("Verdana"),
+                                                              new Typeface(MainWindow.FONT_FAMILY),
                                                               30, System.Windows.Media.Brushes.Black),
                                                               new Point(sl.X + i0XOffset + textXOffset, sl.Y + i0YOffset + textYOffset));
 
@@ -877,7 +915,7 @@
                 }
                 drawingContext.DrawText(new FormattedText("i1", CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
-                                                              new Typeface("Verdana"),
+                                                              new Typeface(MainWindow.FONT_FAMILY),
                                                               30, System.Windows.Media.Brushes.Black),
                                                               new Point(sl.X + i0XOffset + textXOffset + 20, sl.Y + i0YOffset + textYOffset - 40));
 
@@ -893,7 +931,7 @@
                 }
                 drawingContext.DrawText(new FormattedText("i2", CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
-                                                              new Typeface("Verdana"),
+                                                              new Typeface(MainWindow.FONT_FAMILY),
                                                               30, System.Windows.Media.Brushes.Black),
                                                               new Point(sl.X + i0XOffset + textXOffset + 60, sl.Y + i0YOffset + textYOffset - 60));
                 // hAND AT APPROX 85
@@ -908,7 +946,7 @@
                 }
                 drawingContext.DrawText(new FormattedText("i3", CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
-                                                              new Typeface("Verdana"),
+                                                              new Typeface(MainWindow.FONT_FAMILY),
                                                               30, System.Windows.Media.Brushes.Black),
                                                               new Point(sl.X + i0XOffset + textXOffset + 100, sl.Y + i0YOffset + textYOffset - 70));
 
