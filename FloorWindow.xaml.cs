@@ -96,8 +96,8 @@ namespace GesturalMusic
                 }
 
                 // Draw center marker
-                dc.DrawRectangle(FlatColors.DARK_BLUEGRAY, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
-                dc.DrawRectangle(FlatColors.DARK_BLUEGRAY, null, new Rect(floor.centroid.X - 3, floor.centroid.Y - 4, 6, 8));
+                dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
+                dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 3, floor.centroid.Y - 4, 6, 8));
 
                 // And the instrument to each partition
                 if (curQuadrant != -1)
@@ -105,22 +105,22 @@ namespace GesturalMusic
                     dc.DrawText(new FormattedText(instrNames[0], CultureInfo.GetCultureInfo("en-us"),
                                                                     FlowDirection.RightToLeft,
                                                                     new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.DARK_BLUEGRAY),
+                                                                    18, FlatColors.WHITE),
                                                                     new Point(floor.points[2].X - 10, floor.points[2].Y - 20));
                     dc.DrawText(new FormattedText(instrNames[1], CultureInfo.GetCultureInfo("en-us"),
                                                                     FlowDirection.LeftToRight,
                                                                     new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.DARK_BLUEGRAY),
+                                                                    18, FlatColors.WHITE),
                                                                     new Point(floor.points[1].X + 10, floor.points[1].Y - 20));
                     dc.DrawText(new FormattedText(instrNames[2], CultureInfo.GetCultureInfo("en-us"),
                                                                     FlowDirection.RightToLeft,
                                                                     new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.DARK_BLUEGRAY),
+                                                                    18, FlatColors.WHITE),
                                                                     new Point(floor.points[3].X - 10, floor.points[3].Y + 2));
                     dc.DrawText(new FormattedText(instrNames[3], CultureInfo.GetCultureInfo("en-us"),
                                                                     FlowDirection.LeftToRight,
                                                                     new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.DARK_BLUEGRAY),
+                                                                    18, FlatColors.WHITE),
                                                                     new Point(floor.points[0].X + 10, floor.points[0].Y + 2));
                 }
 
