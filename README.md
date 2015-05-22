@@ -28,5 +28,10 @@ Unfortunately, the project is sensitive to the requirements of the Kinect SDK an
 --------------------
 The [test project](Other/test Project/test.als) should be configured and ready to go, so start the Kinect app and the Ableton file, step back and enjoy!
 
+4. Video
+-------------------
+- Version 2.0 demonstration: https://www.youtube.com/watch?v=5LAG0SH2lwg
+- Version 1.0 demonstration: https://www.youtube.com/watch?v=NU2ZUjyDzuI
+
 
 *For more information, please see the Documentation folder. Note that this project is currently undergoing major changes and this information may be out of date.*
