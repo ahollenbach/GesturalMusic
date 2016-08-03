@@ -10,55 +10,50 @@ namespace GesturalMusic
 {
     class LooperOSC
     {
-        private bool isRecd = false;
-        private bool isOvdb = false;
-        private bool isPlay = false;
-        private bool isStop = false;
-        //private bool isClear = false;
-        //private bool isUndo = false;
-        private string name;
+        private bool isRecording = false;
+        private bool isOverdubbing = false;
+        private bool isPlaying = false;
+        private bool isStopped = false;
+
         private static UdpWriter oscLoop;
         private double barrier = 0.2;
 
         public LooperOSC()
         {
-            Console.WriteLine("Looper constructor");
+            Console.WriteLine("Starting looper...");
             ResetOsc();
-
         }
 
-        public static void ResetOsc() 
+        public static void ResetOsc()
         {
             oscLoop = new UdpWriter(MainWindow.oscHost, MainWindow.looperOscPort);
         }
 
         public void record()
         {
-            if (!isRecd)
+            if (!isRecording)
             {
-                Console.WriteLine("Recording");
                 OscElement o = new OscElement("/Looper/0/State", "Record");
                 oscLoop.Send(o);
-                isRecd = true;
-                isOvdb = false;
-                isPlay = false;
-                isStop = false;
+                isRecording = true;
+                isOverdubbing = false;
+                isPlaying = false;
+                isStopped = false;
             }
             else
                 return;
-            //Console.WriteLine("msg sent maybe??");
         }
-       
+
         public void overdub()
         {
-            if (!isOvdb)
+            if (!isOverdubbing)
             {
                 OscElement o = new OscElement("/Looper/0/State", "Overdub");
                 oscLoop.Send(o);
-                isRecd = false;
-                isOvdb = true;
-                isPlay = false;
-                isStop = false;
+                isRecording = false;
+                isOverdubbing = true;
+                isPlaying = false;
+                isStopped = false;
             }
             else
                 return;
@@ -67,51 +62,44 @@ namespace GesturalMusic
 
         public void play()
         {
-            if (!isPlay)
+            if (!isPlaying)
             {
                 OscElement o = new OscElement("/Looper/0/State", "Play");
                 oscLoop.Send(o);
-                isRecd = false;
-                isOvdb = false;
-                isPlay = true;
-                isStop = false;
+                isRecording = false;
+                isOverdubbing = false;
+                isPlaying = true;
+                isStopped = false;
             }
         }
 
         public void stop()
         {
-            if (!isStop)
+            if (!isStopped)
             {
                 OscElement o = new OscElement("/Looper/0/State", "Stop");
                 oscLoop.Send(o);
-                isRecd = false;
-                isOvdb = false;
-                isPlay = false;
-                isStop = true;
+                isRecording = false;
+                isOverdubbing = false;
+                isPlaying = false;
+                isStopped = true;
             }
         }
 
-        public void clear()
-        {
-            /*
-            OscElement o = new OscElement("/Looper/0/State", "Record");
-            oscLoop.Send(o);
-            isRecd = false;
-            isOvdb = false;
-            isPlay = false;
-            isStop = false;
-            o = new OscElement("/Looper/0/State", "Stop");
-            oscLoop.Send(o);
-             */
-        }
+        /// <summary>
+        /// Determines if looper data should be sent, given the body skeleton.
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
         public bool SendLooperData(Body body)
         {
             try
             {
                 if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
                     (body.Joints[JointType.WristRight].Position.Y < body.Joints[JointType.SpineShoulder].Position.Y))
-                    if ((body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z + barrier) && 
-                        (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) > 
+                {
+                    if ((body.Joints[JointType.AnkleRight].Position.Z > body.Joints[JointType.SpineBase].Position.Z + barrier) &&
+                        (Math.Abs(body.Joints[JointType.AnkleRight].Position.Z - body.Joints[JointType.SpineBase].Position.Z) >
                         Math.Abs(body.Joints[JointType.AnkleLeft].Position.Z - body.Joints[JointType.SpineBase].Position.Z)))
                     {
                         this.record();
@@ -139,21 +127,17 @@ namespace GesturalMusic
                         return true;
                     }
                     else
+                    {
                         return false;
-                else if ((body.HandRightState == HandState.Lasso && body.HandLeftState == HandState.Open) &&
-                    (body.Joints[JointType.WristRight].Position.Y > body.Joints[JointType.SpineShoulder].Position.Y))
-                {
-                    Console.WriteLine("Undo/Clear");
-
+                    }
                 }
-                    return false;
             }
             catch (Exception)
             {
                 return false;
             }
 
+            return false;
         }
-
-   }
- }
+    }
+}
