@@ -19,8 +19,6 @@
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        string val1 = "void";
-
         public readonly static String FONT_FAMILY = "Verdana";
 
         /// <summary>
@@ -175,12 +173,13 @@
         /// <param name="e">event arguments</param>
         private void LaunchProjectorScreen(object sender, RoutedEventArgs e)
         {
-            if (floorWindow == null)
+            if (this.floorWindow == null)
             {
-                floorWindow = new FloorWindow(this.displayWidth, this.displayHeight);
-                floorWindow.Show();
+                this.floorWindow = new FloorWindow(this.displayWidth, this.displayHeight);
+                this.floorWindow.Show();
+                this.floorWindow.Draw(-1, new String[4]);
             }
-               
+
         }
 
         private void SetRecipient(object sender, RoutedEventArgs e)
@@ -410,7 +409,6 @@
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
 
-                    // Run the core body analysis routine 
                     Update(bodyFrame);
                 }
             }
@@ -454,7 +452,7 @@
                     dc.DrawRectangle(FlatColors.WHITE, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                     // Draw our floor
-                    if (floorWindow != null) floorWindow.Draw(-1, new String[4]);
+                    if (this.floorWindow != null) this.floorWindow.Draw(-1, new String[4]);
                     return;
                 }
 
@@ -522,15 +520,15 @@
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
             }
 
-            if (floorWindow != null)
+            if (this.floorWindow != null)
             {
-                // do this because vs is being stupid
-                String[] names = new String[4];
-                for (int i = 0; i < 4; i++)
+                String[] names = new String[instruments.Length];
+                for (int i = 0; i < instruments.Length; i++)
                 {
                     names[i] = instruments[i].name;
                 }
-                floorWindow.Draw(PartitionManager.GetPartition(body.Joints[JointType.SpineMid].Position), names);
+
+                this.floorWindow.Draw(PartitionManager.GetPartition(body.Joints[JointType.SpineMid].Position), names);
             }
         }
 

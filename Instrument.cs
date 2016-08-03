@@ -75,7 +75,7 @@ namespace GesturalMusic
                         return false;
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // Problem getting the note (maybe the hand state wasn't good?), so do nothing
                     return false;
