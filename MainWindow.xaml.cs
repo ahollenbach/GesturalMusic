@@ -827,13 +827,13 @@
             drawingContext.DrawRectangle(
                     Brushes.DarkGray,
                     null,
-                    new Rect(this.displayWidth / 2 - 30, 0, 60, 20));
+                    new Rect(this.displayWidth / 2 - 36, this.displayHeight-30, 72, 30));
             String curPartition = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position).ToString();
             drawingContext.DrawText(new FormattedText(curPartition, CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
                                                               new Typeface(MainWindow.FONT_FAMILY),
-                                                              18, System.Windows.Media.Brushes.Black),
-                                                              new Point(this.displayWidth / 2 - 10, 1));
+                                                              20, System.Windows.Media.Brushes.White),
+                                                              new Point(this.displayWidth / 2 - 6, this.displayHeight-28));
         }
 
         /// <summary>
@@ -874,8 +874,8 @@
 
             DepthSpacePoint sl = this.coordinateMapper.MapCameraPointToDepthSpace(sLeftc);
 
-            float textXOffset = -10;
-            float textYOffset = -15;
+            float textXOffset = -15;
+            float textYOffset = -20;
 
             float i0XOffset = -150;
             float i0YOffset = -30;
@@ -964,10 +964,10 @@
         /// <param name="drawingContext"></param>
         private void displaySetConfirmation(DrawingContext drawingContext, string displayThis)
         {
-            Point textOrigin = new Point(420, 40);
+            Point textOrigin = new Point(430, 40);
             Point ellipseOrigin = new Point(450, 50);
             // Denotes whether current region has been set or unset
-            drawingContext.DrawEllipse(Brushes.ForestGreen, new Pen(Brushes.ForestGreen, 1), ellipseOrigin, 40, 40);
+            drawingContext.DrawEllipse(FlatColors.LIGHT_BLUE, new Pen(FlatColors.LIGHT_BLUE, 1), ellipseOrigin, 40, 40);
             FormattedText writeThis = new FormattedText(displayThis, new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 15.0, Brushes.White);
             drawingContext.DrawText(writeThis, textOrigin);
         }
