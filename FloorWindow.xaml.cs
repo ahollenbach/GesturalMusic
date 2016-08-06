@@ -12,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 
 namespace GesturalMusic
@@ -21,22 +22,6 @@ namespace GesturalMusic
     /// </summary>
     public partial class FloorWindow : Window
     {
-
-        /// <summary>
-        /// Constant for clamping Z values of camera space points from being negative
-        /// </summary>
-        private const float InferredZPositionClamp = 0.1f;
-
-        /// <summary>
-        /// Drawing group for body rendering output
-        /// </summary>
-        private DrawingGroup drawingGroup;
-
-        /// <summary>
-        /// Drawing image that we will display
-        /// </summary>
-        private DrawingImage imageSource;
-
         /// <summary>
         /// Width of display (depth space)
         /// </summary>
@@ -48,6 +33,9 @@ namespace GesturalMusic
         private int displayHeight;
 
         private Floor floor;
+        private ModelVisual3D model = new ModelVisual3D();
+        private Material highlightMaterial;
+        private Material normalMaterial;
 
         private Boolean trackingMouse;
         private Boolean trackingRightMouse;
@@ -55,78 +43,143 @@ namespace GesturalMusic
 
         public FloorWindow(int displayWidth, int displayHeight)
         {
-            this.displayHeight = (int)Math.Round(this.Width);
-            this.displayWidth = (int)Math.Round(this.Height);
-
-            this.drawingGroup = new DrawingGroup();
-
-            // Create an image source that we can use in our image control
-            this.imageSource = new DrawingImage(this.drawingGroup);
-
-            this.DataContext = this;
-
             this.InitializeComponent();
 
-            // Initialize our floor
-            floor = new Floor(100, 100, 400, 200);
+            this.highlightMaterial = GetSurfaceMaterial(Colors.Red);
+            this.normalMaterial = GetSurfaceMaterial(Colors.Green);
+
+            // Draw first time
+            // Depths are negative or otherwise x has to be negative
+            this.floor = new Floor(new Point3D(-2, 0, -4), new Point3D(-1.25, 0, -2), new Point3D(1.25, 0, -2), new Point3D(2, 0, -4), new Point3D(0, 0, -3));
+            model = GetFloorModel(0, this.floor);
+            floorViewport.Children.Add(model);
 
             trackingMouse = false;
         }
 
         public void Draw(int curQuadrant, String[] instrNames)
         {
-            this.displayHeight = (int)Math.Round(this.Width);
-            this.displayWidth = (int)Math.Round(this.Height);
+            //model = GetFloorModel(curQuadrant, this.floor);
 
-            using (DrawingContext dc = this.drawingGroup.Open())
-            {
-                // Draw a background to fill the space
-                dc.DrawRectangle(FlatColors.MIDNIGHT_BLACK, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+            //this.displayHeight = (int)Math.Round(this.Width);
+            //this.displayWidth = (int)Math.Round(this.Height);
 
-                // Get the latest floor information
-                Path p = makePath(floor.points);
-                //Console.WriteLine(floor.points[0] + " " + floor.points[1] + " " + floor.points[2] + " " + floor.points[3]);
-                dc.DrawGeometry(FlatColors.LIGHT_GREEN, null, p.Data);
+            //using (DrawingContext dc = this.drawingGroup.Open())
+            //{
+            //    // Draw a background to fill the space
+            //    dc.DrawRectangle(FlatColors.MIDNIGHT_BLACK, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
-                // Draw current quadrant
-                if (curQuadrant != -1)
-                {
-                    Path highlightedQuadrant = makePath(floor.GetQuadrantPoints(curQuadrant));
-                    dc.DrawGeometry(FlatColors.LIGHT_RED, null, highlightedQuadrant.Data);
-                }
+            //    // Get the latest floor information
+            //    Path p = makePath(floor.points);
+            //    //Console.WriteLine(floor.points[0] + " " + floor.points[1] + " " + floor.points[2] + " " + floor.points[3]);
+            //    dc.DrawGeometry(FlatColors.LIGHT_GREEN, null, p.Data);
 
-                // Draw center marker
-                dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
-                dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 3, floor.centroid.Y - 4, 6, 8));
+            //    // Draw current quadrant
+            //    if (curQuadrant != -1)
+            //    {
+            //        Path highlightedQuadrant = makePath(floor.GetQuadrantPoints(curQuadrant));
+            //        dc.DrawGeometry(FlatColors.LIGHT_RED, null, highlightedQuadrant.Data);
+            //    }
 
-                // And the instrument to each partition
-                if (curQuadrant != -1)
-                {
-                    dc.DrawText(new FormattedText(instrNames[0], CultureInfo.GetCultureInfo("en-us"),
-                                                                    FlowDirection.RightToLeft,
-                                                                    new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.WHITE),
-                                                                    new Point(floor.points[2].X - 10, floor.points[2].Y - 20));
-                    dc.DrawText(new FormattedText(instrNames[1], CultureInfo.GetCultureInfo("en-us"),
-                                                                    FlowDirection.LeftToRight,
-                                                                    new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.WHITE),
-                                                                    new Point(floor.points[1].X + 10, floor.points[1].Y - 20));
-                    dc.DrawText(new FormattedText(instrNames[2], CultureInfo.GetCultureInfo("en-us"),
-                                                                    FlowDirection.RightToLeft,
-                                                                    new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.WHITE),
-                                                                    new Point(floor.points[3].X - 10, floor.points[3].Y + 2));
-                    dc.DrawText(new FormattedText(instrNames[3], CultureInfo.GetCultureInfo("en-us"),
-                                                                    FlowDirection.LeftToRight,
-                                                                    new Typeface(MainWindow.FONT_FAMILY),
-                                                                    18, FlatColors.WHITE),
-                                                                    new Point(floor.points[0].X + 10, floor.points[0].Y + 2));
-                }
+            //    // Draw center marker
+            //    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
+            //    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 3, floor.centroid.Y - 4, 6, 8));
 
-                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-            }
-            
+            //    // And the instrument to each partition
+            //    if (curQuadrant != -1)
+            //    {
+            //        dc.DrawText(TextBuilder(instrNames[0], flowDirection: FlowDirection.RightToLeft), new Point(floor.points[2].X - 10, floor.points[2].Y - 20));
+            //        dc.DrawText(TextBuilder(instrNames[1], flowDirection: FlowDirection.LeftToRight), new Point(floor.points[1].X + 10, floor.points[1].Y - 20));
+            //        dc.DrawText(TextBuilder(instrNames[2], flowDirection: FlowDirection.RightToLeft), new Point(floor.points[3].X - 10, floor.points[3].Y + 2));
+            //        dc.DrawText(TextBuilder(instrNames[3], flowDirection: FlowDirection.LeftToRight), new Point(floor.points[0].X + 10, floor.points[0].Y + 2));
+            //    }
+
+            //    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+            //}
+
+        }
+
+        public Material GetSurfaceMaterial(Color color)
+        {
+            return new DiffuseMaterial(new SolidColorBrush(color));
+        }
+        public ModelVisual3D GetFloorModel(int currentPartition, Floor floor)
+        {
+            Model3DGroup floorModel = new Model3DGroup();
+
+            Point3D backMidpoint = GetMidpoint(floor.backLeft, floor.backRight);
+            Point3D frontMidpoint = GetMidpoint(floor.frontLeft, floor.frontRight);
+            Point3D leftMidpoint = GetMidpoint(floor.backLeft, floor.frontLeft);
+            Point3D rightMidpoint = GetMidpoint(floor.backRight, floor.frontRight);
+
+            Material material = normalMaterial;
+
+            // 0
+            material = currentPartition == 0 ? highlightMaterial : normalMaterial;
+            AddQuad(floorModel, material, floor.frontRight, frontMidpoint, floor.centroid, rightMidpoint);
+
+            // 1
+            material = currentPartition == 1 ? highlightMaterial : normalMaterial;
+            AddQuad(floorModel, material, floor.frontLeft, leftMidpoint, floor.centroid, frontMidpoint);
+
+            // 2
+            material = currentPartition == 2 ? highlightMaterial : normalMaterial;
+            AddQuad(floorModel, material, floor.centroid, backMidpoint, floor.backRight, rightMidpoint);
+
+            // 3
+            material = currentPartition == 3 ? highlightMaterial : normalMaterial;
+            AddQuad(floorModel, material, leftMidpoint, floor.backLeft, backMidpoint, floor.centroid);
+
+            MeshGeometry3D myMeshGeometry3D = new MeshGeometry3D();
+
+            var model = new ModelVisual3D();
+            model.Content = floorModel;
+            return model;
+        }
+
+        private Point3D GetMidpoint(Point3D p1, Point3D p2)
+        {
+            return new Point3D((p1.X + p2.X) / 2, 0, (p1.Z + p2.Z) / 2);
+        }
+
+        // Pass in clockwise
+        private void AddQuad(Model3DGroup group, Material material, Point3D p0, Point3D p1, Point3D p2, Point3D p3)
+        {
+            group.Children.Add(CreateTriangleModel(material, p0, p2, p1));
+            group.Children.Add(CreateTriangleModel(material, p2, p0, p3));
+        }
+
+        private Model3DGroup CreateTriangleModel(Material material, Point3D p0, Point3D p1, Point3D p2)
+        {
+            var mesh = new MeshGeometry3D();
+            mesh.Positions.Add(p0);
+            mesh.Positions.Add(p1);
+            mesh.Positions.Add(p2);
+            mesh.TriangleIndices.Add(0);
+            mesh.TriangleIndices.Add(1);
+            mesh.TriangleIndices.Add(2);
+            var normal = CalculateNormal(p0, p1, p2);
+            mesh.Normals.Add(normal);
+            mesh.Normals.Add(normal);
+            mesh.Normals.Add(normal);
+
+            var model = new GeometryModel3D(mesh, material);
+
+            var group = new Model3DGroup();
+            group.Children.Add(model);
+            return group;
+        }
+
+        private Vector3D CalculateNormal(Point3D p0, Point3D p1, Point3D p2)
+        {
+            var v0 = new Vector3D(p1.X - p0.X, p1.Y - p0.Y, p1.Z - p0.Z);
+            var v1 = new Vector3D(p2.X - p1.X, p2.Y - p1.Y, p2.Z - p1.Z);
+            return Vector3D.CrossProduct(v0, v1);
+        }
+
+        private FormattedText TextBuilder(String text, FlowDirection flowDirection = FlowDirection.LeftToRight, int size = 18)
+        {
+            return new FormattedText(text, CultureInfo.GetCultureInfo("en-us"), flowDirection, new Typeface(MainWindow.FONT_FAMILY), size, FlatColors.WHITE);
         }
 
         private void FloorCanvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -147,7 +200,8 @@ namespace GesturalMusic
             trackingMouse = true;
 
             // set the corner
-            floor.points[cornerSelected] = e.GetPosition(FloorCanvas);
+            Console.WriteLine(e.GetPosition(FloorCanvas));
+            //floor.SetFloorPoint(cornerSelected, e.GetPosition(floorViewport));
         }
         private void FloorCanvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -165,60 +219,15 @@ namespace GesturalMusic
 
         private void FloorCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (trackingMouse)
-            {
-                floor.points[cornerSelected] = e.GetPosition(FloorCanvas);
-                //floor.SetLowerLeft(e.GetPosition(FloorCanvas));
-            }
-            else if (trackingRightMouse)
-            {
-                floor.centroid = e.GetPosition(FloorCanvas);
-            }
-        }
-
-
-        // Thanks, http://stackoverflow.com/a/24959131
-        private Path makePath(params Point[] points)
-        {
-            Path path = new Path()
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
-
-            if (points.Length == 0)
-            {
-                return path;
-            }
-
-            PathSegmentCollection pathSegments = new PathSegmentCollection();
-
-            for (int i = 1; i < points.Length; i++)
-            {
-                pathSegments.Add(new LineSegment(points[i], true));
-            }
-
-            path.Data = new PathGeometry() {
-                Figures = new PathFigureCollection() {
-                    new PathFigure() {
-                        StartPoint = points[0],
-                        Segments = pathSegments
-                    }
-                }
-            };
-
-            return path;
-        }
-
-        /// <summary>
-        /// Gets the bitmap to display
-        /// </summary>
-        public ImageSource ImageSource
-        {
-            get
-            {
-                return this.imageSource;
-            }
+            //if (trackingMouse)
+            //{
+            //    floor.points[cornerSelected] = e.GetPosition(FloorCanvas);
+            //    //floor.SetLowerLeft(e.GetPosition(FloorCanvas));
+            //}
+            //else if (trackingRightMouse)
+            //{
+            //    floor.centroid = e.GetPosition(FloorCanvas);
+            //}
         }
     }
 }

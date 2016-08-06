@@ -359,7 +359,6 @@
             {
                 this.bodyFrameReader.FrameArrived += this.Reader_FrameArrived;
             }
-
         }
 
         /// <summary>
