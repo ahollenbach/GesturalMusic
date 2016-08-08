@@ -25,6 +25,18 @@ namespace GesturalMusic
             this.centroid = centroid;
         }
 
+        override public String ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("Back Left: {0}\n", this.backLeft);
+            sb.AppendFormat("Back Right: {0}\n", this.backRight);
+            sb.AppendFormat("Front Left: {0}\n", this.frontLeft);
+            sb.AppendFormat("Front Right: {0}\n", this.frontRight);
+            sb.AppendFormat("Centroid: {0}\n", this.centroid);
+
+            return sb.ToString();
+        }
+
         public void SetFloorPoint(int index, Point3D p)
         {
             //   3       2

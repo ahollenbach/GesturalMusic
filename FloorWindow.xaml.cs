@@ -48,6 +48,8 @@ namespace GesturalMusic
             floorViewport.Children.Add(model);
 
             trackingMouse = false;
+
+            tmp();
         }
 
         public void Draw(int curQuadrant, String[] instrNames)
@@ -203,7 +205,7 @@ namespace GesturalMusic
             double yOffset = (currentMousePoint.Y - startMousePoint.Y) / FloorCanvas.ActualWidth;
             startMousePoint = currentMousePoint;
 
-            Vector3D offset = new Vector3D(xOffset * movementScale, 0, yOffset * movementScale);
+            Vector3D offset = new Vector3D(xOffset * movementScale, 0, yOffset * movementScale * 3);
 
             if (e.MiddleButton == MouseButtonState.Pressed)
             {
@@ -257,6 +259,23 @@ namespace GesturalMusic
             }
             
             this.UpdateCameraPosition(offset);
+
+            this.PrintSceneState();
+        }
+        
+        private void PrintSceneState()
+        {
+            Console.WriteLine("------------------");
+            Console.WriteLine("Camera Position: " + this.FloorCamera.Position);
+            Console.WriteLine("Camera Look Dir: " + this.FloorCamera.LookDirection);
+            Console.WriteLine(this.floor);
+            Console.WriteLine();
+        }
+
+        private void tmp()
+        {
+            this.FloorCamera.Position = new Point3D(-1.7, 1.5, 0.5);
+            this.FloorCamera.LookDirection = new Vector3D(0.36, -0.5, -1.2);
         }
     }
 }
