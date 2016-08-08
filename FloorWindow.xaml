@@ -9,11 +9,12 @@
         MouseMove="FloorCanvas_MouseMove"
         MouseRightButtonDown="FloorCanvas_MouseRightButtonDown"
         MouseRightButtonUp="FloorCanvas_MouseRightButtonUp"
+        KeyDown="Window_KeyDown"
         >
     <DockPanel x:Name="FloorCanvas">
         <Viewport3D x:Name="floorViewport" ClipToBounds="True" HorizontalAlignment="Stretch">
             <Viewport3D.Camera>
-                <PerspectiveCamera 
+                <PerspectiveCamera x:Name="FloorCamera"
     				LookDirection="0,-0.5,-5"
     				UpDirection="0,1,0"
     				Position="0,2,5" 

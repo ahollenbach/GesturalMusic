@@ -54,5 +54,46 @@ namespace GesturalMusic
         {
             this.centroid = p;
         }
+
+        public Point3D GetPointAtIndex(int index)
+        {
+            //   3       2
+            //    q3 | q2
+            // ------------
+            //    q1 | q0
+            //   1       0
+            //      KIN
+
+            Point3D point = frontRight;
+            switch (index)
+            {
+                case 0:
+                    point = frontRight;
+                    break;
+                case 1:
+                    point = frontLeft;
+                    break;
+                case 2:
+                    point = backRight;
+                    break;
+                case 3:
+                    point = backLeft;
+                    break;
+            }
+
+            return point;
+        }
+
+        public void UpdateFloorPointRelative(int cornerSelected, Vector3D offset)
+        {
+            Point3D basePoint = this.GetPointAtIndex(cornerSelected);
+
+            this.SetFloorPoint(cornerSelected, Point3D.Add(basePoint, offset));
+        }
+
+        public void UpdateCentroidRelative(Vector3D offset)
+        {
+            this.SetCentroid(Point3D.Add(this.centroid, offset));
+        }
     }
 }

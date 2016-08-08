@@ -173,13 +173,12 @@
         /// <param name="e">event arguments</param>
         private void LaunchProjectorScreen(object sender, RoutedEventArgs e)
         {
-            if (this.floorWindow == null)
+            if (this.floorWindow == null || !this.floorWindow.IsVisible)
             {
-                this.floorWindow = new FloorWindow(this.displayWidth, this.displayHeight);
+                this.floorWindow = new FloorWindow();
                 this.floorWindow.Show();
-                this.floorWindow.Draw(-1, new String[4]);
+                this.floorWindow.Draw(1, new String[4]); // TODO: test
             }
-
         }
 
         private void SetRecipient(object sender, RoutedEventArgs e)
@@ -451,7 +450,7 @@
                     dc.DrawRectangle(FlatColors.WHITE, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                     // Draw our floor
-                    if (this.floorWindow != null) this.floorWindow.Draw(-1, new String[4]);
+                    if (this.floorWindow != null) this.floorWindow.Draw(1, new String[4]);
                     return;
                 }
 

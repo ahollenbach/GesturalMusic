@@ -22,16 +22,6 @@ namespace GesturalMusic
     /// </summary>
     public partial class FloorWindow : Window
     {
-        /// <summary>
-        /// Width of display (depth space)
-        /// </summary>
-        private int displayWidth;
-
-        /// <summary>
-        /// Height of display (depth space)
-        /// </summary>
-        private int displayHeight;
-
         private Floor floor;
         private ModelVisual3D model = new ModelVisual3D();
         private Material highlightMaterial;
@@ -40,8 +30,9 @@ namespace GesturalMusic
         private Boolean trackingMouse;
         private Boolean trackingRightMouse;
         private int cornerSelected;
+        private Point startMousePoint;
 
-        public FloorWindow(int displayWidth, int displayHeight)
+        public FloorWindow()
         {
             this.InitializeComponent();
 
@@ -51,7 +42,9 @@ namespace GesturalMusic
             // Draw first time
             // Depths are negative or otherwise x has to be negative
             this.floor = new Floor(new Point3D(-2, 0, -4), new Point3D(-1.25, 0, -2), new Point3D(1.25, 0, -2), new Point3D(2, 0, -4), new Point3D(0, 0, -3));
-            model = GetFloorModel(0, this.floor);
+            model = new ModelVisual3D();
+            
+            this.UpdateFloorModel(0);
             floorViewport.Children.Add(model);
 
             trackingMouse = false;
@@ -59,27 +52,8 @@ namespace GesturalMusic
 
         public void Draw(int curQuadrant, String[] instrNames)
         {
-            //model = GetFloorModel(curQuadrant, this.floor);
-
-            //this.displayHeight = (int)Math.Round(this.Width);
-            //this.displayWidth = (int)Math.Round(this.Height);
-
-            //using (DrawingContext dc = this.drawingGroup.Open())
-            //{
-            //    // Draw a background to fill the space
-            //    dc.DrawRectangle(FlatColors.MIDNIGHT_BLACK, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-
-            //    // Get the latest floor information
-            //    Path p = makePath(floor.points);
-            //    //Console.WriteLine(floor.points[0] + " " + floor.points[1] + " " + floor.points[2] + " " + floor.points[3]);
-            //    dc.DrawGeometry(FlatColors.LIGHT_GREEN, null, p.Data);
-
-            //    // Draw current quadrant
-            //    if (curQuadrant != -1)
-            //    {
-            //        Path highlightedQuadrant = makePath(floor.GetQuadrantPoints(curQuadrant));
-            //        dc.DrawGeometry(FlatColors.LIGHT_RED, null, highlightedQuadrant.Data);
-            //    }
+            this.UpdateFloorModel(curQuadrant);
+            
 
             //    // Draw center marker
             //    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
@@ -103,38 +77,35 @@ namespace GesturalMusic
         {
             return new DiffuseMaterial(new SolidColorBrush(color));
         }
-        public ModelVisual3D GetFloorModel(int currentPartition, Floor floor)
+
+        public void UpdateFloorModel(int currentPartition)
         {
             Model3DGroup floorModel = new Model3DGroup();
 
-            Point3D backMidpoint = GetMidpoint(floor.backLeft, floor.backRight);
-            Point3D frontMidpoint = GetMidpoint(floor.frontLeft, floor.frontRight);
-            Point3D leftMidpoint = GetMidpoint(floor.backLeft, floor.frontLeft);
-            Point3D rightMidpoint = GetMidpoint(floor.backRight, floor.frontRight);
+            Point3D backMidpoint = GetMidpoint(this.floor.backLeft, this.floor.backRight);
+            Point3D frontMidpoint = GetMidpoint(this.floor.frontLeft, this.floor.frontRight);
+            Point3D leftMidpoint = GetMidpoint(this.floor.backLeft, this.floor.frontLeft);
+            Point3D rightMidpoint = GetMidpoint(this.floor.backRight, this.floor.frontRight);
 
             Material material = normalMaterial;
 
             // 0
             material = currentPartition == 0 ? highlightMaterial : normalMaterial;
-            AddQuad(floorModel, material, floor.frontRight, frontMidpoint, floor.centroid, rightMidpoint);
+            AddQuad(floorModel, material, this.floor.frontRight, frontMidpoint, this.floor.centroid, rightMidpoint);
 
             // 1
             material = currentPartition == 1 ? highlightMaterial : normalMaterial;
-            AddQuad(floorModel, material, floor.frontLeft, leftMidpoint, floor.centroid, frontMidpoint);
+            AddQuad(floorModel, material, this.floor.frontLeft, leftMidpoint, this.floor.centroid, frontMidpoint);
 
             // 2
             material = currentPartition == 2 ? highlightMaterial : normalMaterial;
-            AddQuad(floorModel, material, floor.centroid, backMidpoint, floor.backRight, rightMidpoint);
+            AddQuad(floorModel, material, this.floor.centroid, backMidpoint, this.floor.backRight, rightMidpoint);
 
             // 3
             material = currentPartition == 3 ? highlightMaterial : normalMaterial;
-            AddQuad(floorModel, material, leftMidpoint, floor.backLeft, backMidpoint, floor.centroid);
+            AddQuad(floorModel, material, leftMidpoint, this.floor.backLeft, backMidpoint, this.floor.centroid);
 
-            MeshGeometry3D myMeshGeometry3D = new MeshGeometry3D();
-
-            var model = new ModelVisual3D();
             model.Content = floorModel;
-            return model;
         }
 
         private Point3D GetMidpoint(Point3D p1, Point3D p2)
@@ -184,50 +155,108 @@ namespace GesturalMusic
 
         private void FloorCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            cornerSelected = 0;
-            if      (Keyboard.IsKeyDown(Key.D1)) cornerSelected = 0;
-            else if (Keyboard.IsKeyDown(Key.D2)) cornerSelected = 1;
-            else if (Keyboard.IsKeyDown(Key.D3)) cornerSelected = 2;
-            else if (Keyboard.IsKeyDown(Key.D4)) cornerSelected = 3;
-            else
+            if      (Keyboard.IsKeyDown(Key.D1)) this.cornerSelected = 0;
+            else if (Keyboard.IsKeyDown(Key.D2)) this.cornerSelected = 1;
+            else if (Keyboard.IsKeyDown(Key.D3)) this.cornerSelected = 2;
+            else if (Keyboard.IsKeyDown(Key.D4)) this.cornerSelected = 3;
+            else if (e.MiddleButton == MouseButtonState.Released)
             {
-                // no key pressed, don't track
-                trackingMouse = false;
+                // Either no num key pressed or no middle button, don't track
+                this.trackingMouse = false;
                 return;
             }
 
             // track the mouse
-            trackingMouse = true;
+            this.trackingMouse = true;
 
-            // set the corner
-            Console.WriteLine(e.GetPosition(FloorCanvas));
-            //floor.SetFloorPoint(cornerSelected, e.GetPosition(floorViewport));
+            this.startMousePoint = e.GetPosition(FloorCanvas);
         }
         private void FloorCanvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            trackingRightMouse = true;
+            this.trackingRightMouse = true;
+
+            this.startMousePoint = e.GetPosition(FloorCanvas);
         }
 
         private void FloorCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            trackingMouse = false;
+            this.trackingMouse = false;
         }
         private void FloorCanvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-            trackingRightMouse = false;
+            this.trackingRightMouse = false;
         }
 
         private void FloorCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            //if (trackingMouse)
-            //{
-            //    floor.points[cornerSelected] = e.GetPosition(FloorCanvas);
-            //    //floor.SetLowerLeft(e.GetPosition(FloorCanvas));
-            //}
-            //else if (trackingRightMouse)
-            //{
-            //    floor.centroid = e.GetPosition(FloorCanvas);
-            //}
+            if (!this.trackingMouse && !this.trackingRightMouse)
+            {
+                return;
+            }
+
+            // Defines the movement scale from normalized (-1 -> 1) pixel movement to 3D plane movement
+            double movementScale = 3;
+
+            // Get relative mouse position
+            Point currentMousePoint = e.GetPosition(FloorCanvas);
+            double xOffset = (currentMousePoint.X - startMousePoint.X) / FloorCanvas.ActualWidth;
+            double yOffset = (currentMousePoint.Y - startMousePoint.Y) / FloorCanvas.ActualWidth;
+            startMousePoint = currentMousePoint;
+
+            Vector3D offset = new Vector3D(xOffset * movementScale, 0, yOffset * movementScale);
+
+            if (e.MiddleButton == MouseButtonState.Pressed)
+            {
+                this.UpdateCameraLookDirection(offset);
+            }
+            else if (this.trackingMouse)
+            {
+                floor.UpdateFloorPointRelative(this.cornerSelected, offset);
+            } else if(trackingRightMouse)
+            {
+                floor.UpdateCentroidRelative(offset);
+            }
+        }
+
+        private void UpdateCameraLookDirection(Vector3D offset)
+        {
+            this.FloorCamera.LookDirection += offset;
+        }
+
+        private void UpdateCameraPosition(Vector3D offset)
+        {
+            this.FloorCamera.Position += offset;
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            Vector3D offset = new Vector3D();
+
+            double delta = 0.1;
+
+            switch(e.Key)
+            {
+                case Key.W:
+                    offset.Z = -delta;
+                    break;
+                case Key.S:
+                    offset.Z = delta;
+                    break;
+                case Key.A:
+                    offset.X = -delta;
+                    break;
+                case Key.D:
+                    offset.X = delta;
+                    break;
+                case Key.Q:
+                    offset.Y = delta;
+                    break;
+                case Key.E:
+                    offset.Y = -delta;
+                    break;
+            }
+            
+            this.UpdateCameraPosition(offset);
         }
     }
 }
