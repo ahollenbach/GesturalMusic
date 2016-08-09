@@ -8,14 +8,14 @@ The project allows a single user to create music through gestures using the Kine
 ------------------
 This project requires the following:
 
-* Windows 8, Windows 8.1, or Windows Embedded Standard 8
-* [Kinect for Windows SDK 2.0 Public Preview](http://www.microsoft.com/en-us/kinectforwindows/develop/)
+* Windows 8 or 10
+* [Kinect for Windows SDK 2.0](http://www.microsoft.com/en-us/kinectforwindows/develop/)
 * [Visual Studio](http://www.visualstudio.com/)
 * [Ableton Live](https://www.ableton.com/en/live/new-in-9/)
 * [Max for Live](https://www.ableton.com/en/live/max-for-live/)
 * Kinect v2
 
-Unfortunately, the project is sensitive to the requirements of the Kinect SDK and may not run on all devices.
+Unfortunately, the project is sensitive to the requirements of the Kinect SDK and may not run on all devices. Tested using Visual Studio 2013 and 2015.
 
 2. Installation
 --------------------
@@ -35,4 +35,4 @@ The [test project](Other/test Project/test.als) should be configured and ready t
 - Version 1.0 demonstration: https://www.youtube.com/watch?v=NU2ZUjyDzuI
 
 
-*For more information, please see the Documentation folder. Note that this project is currently undergoing major changes and this information may be out of date.*
+*For more information, please see the Documentation folder.*
