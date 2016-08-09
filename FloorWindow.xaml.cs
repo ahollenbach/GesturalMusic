@@ -30,9 +30,8 @@ namespace GesturalMusic
         ColorFrameReader colorFrameReader;
         bool calibrated = false;
         bool calibrating = false;
-        GeometryModel3D alignmentCube;
+        bool goTime = false;
         KinectSensor kinectSensor;
-        private System.Windows.Media.Imaging.BitmapImage bitmap;
 
         public FloorWindow()
         {
@@ -273,6 +272,9 @@ namespace GesturalMusic
                     this.calibrated = true;
                     this.CloseKinect();
                     break;
+                case Key.P:
+                    this.goTime = true;
+                    break;
             }
 
             this.UpdateCameraPosition(offset);
@@ -322,50 +324,36 @@ namespace GesturalMusic
                 if (colorFrame != null)
                 {
                     var bitmap = colorFrame.ToBitmap();
+                    //bitmap.Save("test.bmp");
+                    //screen.Source = bitmap; // Display
 
-                    Emgu.CV.Image<Bgr, byte> imageFrame = BitmapUtil.ToOpenCVImage(bitmap);
+                    if (this.goTime)
+                    {
+                        System.Windows.Media.Imaging.BitmapEncoder encoder = new System.Windows.Media.Imaging.BmpBitmapEncoder();
+                        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+                        System.IO.MemoryStream ms = new System.IO.MemoryStream();
 
-                    //screen.Source = bitmap;
+                        encoder.Save(ms);
+                        System.Drawing.Bitmap b = new System.Drawing.Bitmap(ms);
 
-                    //var width = colorFrame.FrameDescription.Width;
-                    //var height = colorFrame.FrameDescription.Height;
-                    //var data = new byte[width * height * System.Windows.Media.PixelFormats.Bgra32.BitsPerPixel / 8];
-                    //colorFrame.CopyConvertedFrameDataToArray(data, ColorImageFormat.Bgra);
+                        Emgu.CV.Image<Bgr, Byte> imageFrame = new Image<Bgr, Byte>(b);
 
-                    //var bitmap = new System.Drawing.Bitmap(width, height);
-                    //var bitmapData = bitmap.LockBits(
-                    //    new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                    //    System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                    //    bitmap.PixelFormat);
-                    //Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
-                    //bitmap.UnlockBits(bitmapData);
+                        //// ----------------------------------------------------------------------
 
-                    //Emgu.CV.Image<Bgr, byte> imageFrame = new Image<Bgr, byte> (bitmap);
+                        System.Drawing.Size patternSize = new System.Drawing.Size(6, 6);
+                        Emgu.CV.Util.VectorOfPoint corners = new Emgu.CV.Util.VectorOfPoint();
 
-                    //FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
-                    //this.bitmap = new System.Windows.Media.Imaging.WriteableBitmap(colorFrame. colorFrameDescription.Width, colorFrameDescription.Height);
+                        bool test = CvInvoke.FindChessboardCorners(imageFrame, patternSize, corners);
 
-                    //this.ShowColorFrame(colorFrame);
+                        Console.WriteLine("Calibration Success: " + test);
+                        foreach (System.Drawing.Point cornerPoint in corners.ToArray())
+                        {
+                            Console.WriteLine(cornerPoint.X + ", " + cornerPoint.Y);
+                        }
+                        Console.WriteLine();
 
-                    //var width = colorFrame.FrameDescription.Width;
-                    //var height = colorFrame.FrameDescription.Height;
-
-                    //System.Drawing.Bitmap bmap = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-                    //var image = BitmapUtil.ToOpenCVImage<Bgr, byte>(bmap);
-
-                    //System.Drawing.Size patternSize = new System.Drawing.Size(6, 6);
-                    //Emgu.CV.Util.VectorOfPoint corners = new Emgu.CV.Util.VectorOfPoint();
-
-                    //bool test = CvInvoke.FindChessboardCorners(image, patternSize, corners);
-
-                    //Console.WriteLine("Calibration Success: " + test);
-                    //foreach (System.Drawing.Point cornerPoint in corners.ToArray())
-                    //{
-                    //    Console.WriteLine(cornerPoint.X + ", " + cornerPoint.Y);
-                    //}
-                    //Console.WriteLine();
-
-                    //this.calibrated = true;
+                        this.calibrated = true;
+                    }
                 }
             }
         }
