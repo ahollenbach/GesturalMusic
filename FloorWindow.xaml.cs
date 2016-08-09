@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
-using System.Windows.Shapes;
+using Emgu.CV;
+using Microsoft.Kinect;
+using Emgu.CV.Structure;
+using System.Runtime.InteropServices;
+using LightBuzz.Vitruvius;
 
 namespace GesturalMusic
 {
@@ -31,6 +27,12 @@ namespace GesturalMusic
         private Boolean trackingRightMouse;
         private int cornerSelected;
         private Point startMousePoint;
+        ColorFrameReader colorFrameReader;
+        bool calibrated = false;
+        bool calibrating = false;
+        GeometryModel3D alignmentCube;
+        KinectSensor kinectSensor;
+        private System.Windows.Media.Imaging.BitmapImage bitmap;
 
         public FloorWindow()
         {
@@ -44,18 +46,27 @@ namespace GesturalMusic
             this.floor = new Floor(new Point3D(-2, 0, -4), new Point3D(-1.25, 0, -2), new Point3D(1.25, 0, -2), new Point3D(2, 0, -4), new Point3D(0, 0, -3));
             model = new ModelVisual3D();
             
-            this.UpdateFloorModel(0);
+            this.UpdateFloorModel(-1);
             floorViewport.Children.Add(model);
+
+            // Hide alignment cube
+            AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
 
             trackingMouse = false;
 
-            tmp();
+            //tmp();
         }
 
         public void Draw(int curQuadrant, String[] instrNames)
         {
-            this.UpdateFloorModel(curQuadrant);
-            
+            if(!this.calibrating)
+            {
+                this.UpdateFloorModel(curQuadrant);
+            } else
+            {
+                model.Content = new Model3DGroup(); // Messy
+            }
+
 
             //    // Draw center marker
             //    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
@@ -256,8 +267,14 @@ namespace GesturalMusic
                 case Key.E:
                     offset.Y = -delta;
                     break;
+                case Key.C:
+                    AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
+                    this.calibrating = false;
+                    this.calibrated = true;
+                    this.CloseKinect();
+                    break;
             }
-            
+
             this.UpdateCameraPosition(offset);
 
             this.PrintSceneState();
@@ -276,6 +293,118 @@ namespace GesturalMusic
         {
             this.FloorCamera.Position = new Point3D(-1.7, 1.5, 0.5);
             this.FloorCamera.LookDirection = new Vector3D(0.36, -0.5, -1.2);
+        }
+
+        public void Calibrate()
+        {
+            Console.WriteLine("Calibrating...");
+
+            if (this.kinectSensor == null)
+            {
+                this.kinectSensor = KinectSensor.GetDefault();
+            }
+
+            this.colorFrameReader = this.kinectSensor.ColorFrameSource.OpenReader();
+            if (this.colorFrameReader != null)
+            {
+                this.colorFrameReader.FrameArrived += this.Reader_FrameArrived;
+            }
+        }
+
+        private void Reader_FrameArrived(object sender, ColorFrameArrivedEventArgs e)
+        {
+            if (this.calibrated)
+            {
+                this.EndCalibration();
+            }
+            using (ColorFrame colorFrame = e.FrameReference.AcquireFrame())
+            {
+                if (colorFrame != null)
+                {
+                    var bitmap = colorFrame.ToBitmap();
+
+                    Emgu.CV.Image<Bgr, byte> imageFrame = BitmapUtil.ToOpenCVImage(bitmap);
+
+                    //screen.Source = bitmap;
+
+                    //var width = colorFrame.FrameDescription.Width;
+                    //var height = colorFrame.FrameDescription.Height;
+                    //var data = new byte[width * height * System.Windows.Media.PixelFormats.Bgra32.BitsPerPixel / 8];
+                    //colorFrame.CopyConvertedFrameDataToArray(data, ColorImageFormat.Bgra);
+
+                    //var bitmap = new System.Drawing.Bitmap(width, height);
+                    //var bitmapData = bitmap.LockBits(
+                    //    new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                    //    System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                    //    bitmap.PixelFormat);
+                    //Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
+                    //bitmap.UnlockBits(bitmapData);
+
+                    //Emgu.CV.Image<Bgr, byte> imageFrame = new Image<Bgr, byte> (bitmap);
+
+                    //FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
+                    //this.bitmap = new System.Windows.Media.Imaging.WriteableBitmap(colorFrame. colorFrameDescription.Width, colorFrameDescription.Height);
+
+                    //this.ShowColorFrame(colorFrame);
+
+                    //var width = colorFrame.FrameDescription.Width;
+                    //var height = colorFrame.FrameDescription.Height;
+
+                    //System.Drawing.Bitmap bmap = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+                    //var image = BitmapUtil.ToOpenCVImage<Bgr, byte>(bmap);
+
+                    //System.Drawing.Size patternSize = new System.Drawing.Size(6, 6);
+                    //Emgu.CV.Util.VectorOfPoint corners = new Emgu.CV.Util.VectorOfPoint();
+
+                    //bool test = CvInvoke.FindChessboardCorners(image, patternSize, corners);
+
+                    //Console.WriteLine("Calibration Success: " + test);
+                    //foreach (System.Drawing.Point cornerPoint in corners.ToArray())
+                    //{
+                    //    Console.WriteLine(cornerPoint.X + ", " + cornerPoint.Y);
+                    //}
+                    //Console.WriteLine();
+
+                    //this.calibrated = true;
+                }
+            }
+        }
+
+        private void EndCalibration()
+        {
+            AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
+            this.calibrating = false;
+            this.calibrated = true;
+            this.CloseKinect();
+            Console.WriteLine("Calibration complete.");
+        }
+
+        private void FloorWindow_Closing(object sender, CancelEventArgs e)
+        {
+            this.CloseKinect();
+        }
+
+        private void CloseKinect()
+        {
+            if (this.colorFrameReader != null)
+            {
+                this.colorFrameReader.Dispose();
+                this.colorFrameReader = null;
+            }
+
+            if (this.kinectSensor != null)
+            {
+                this.kinectSensor.Close();
+                this.kinectSensor = null;
+            }
+        }
+
+        private void CalibrateButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.calibrating = true;
+            AlignmentCube.Transform = new ScaleTransform3D(1, 1, 1);
+
+            this.Calibrate();
         }
     }
 }

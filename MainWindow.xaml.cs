@@ -177,7 +177,6 @@
             {
                 this.floorWindow = new FloorWindow();
                 this.floorWindow.Show();
-                this.floorWindow.Draw(1, new String[4]); // TODO: test
             }
         }
 
