@@ -28,6 +28,11 @@ Unfortunately, the project is sensitive to the requirements of the Kinect SDK an
 --------------------
 The [test project](Other/test Project/test.als) should be configured and ready to go, so start the Kinect app and the Ableton file, step back and enjoy!
 
+### Controls
+The 3D projection controls can be a bit confusing at first. The goal is align the camera such that the projection screen is displaying a non-distorted representation of the stage area. The camera is used to estimate the projector's pose.
+
+The WASD controls are used to move the camera location along the X and Y planes, Q and E raise and lower the camera, and the middle mouse click can be used to adjust the look direction.
+
 4. Video
 -------------------
 - Version 2.0 demonstration: https://www.youtube.com/watch?v=5LAG0SH2lwg
