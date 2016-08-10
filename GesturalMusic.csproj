@@ -111,6 +111,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <None Include="Calibration.cs.scratch" />
     <Compile Include="DemoInstrument.cs" />
     <Compile Include="FlatColors.cs" />
     <Compile Include="Filter.cs" />

@@ -10,6 +10,7 @@ using Microsoft.Kinect;
 using Emgu.CV.Structure;
 using System.Runtime.InteropServices;
 using LightBuzz.Vitruvius;
+using System.Windows.Controls;
 
 namespace GesturalMusic
 {
@@ -19,7 +20,9 @@ namespace GesturalMusic
     public partial class FloorWindow : Window
     {
         private Floor floor;
-        private ModelVisual3D model = new ModelVisual3D();
+        private ModelVisual3D model;
+        private ModelVisual3D text;
+
         private Material highlightMaterial;
         private Material normalMaterial;
 
@@ -27,11 +30,6 @@ namespace GesturalMusic
         private Boolean trackingRightMouse;
         private int cornerSelected;
         private Point startMousePoint;
-        ColorFrameReader colorFrameReader;
-        bool calibrated = false;
-        bool calibrating = false;
-        bool goTime = false;
-        KinectSensor kinectSensor;
 
         public FloorWindow()
         {
@@ -44,45 +42,132 @@ namespace GesturalMusic
             // Depths are negative or otherwise x has to be negative
             this.floor = new Floor(new Point3D(-2, 0, -4), new Point3D(-1.25, 0, -2), new Point3D(1.25, 0, -2), new Point3D(2, 0, -4), new Point3D(0, 0, -3));
             model = new ModelVisual3D();
-            
+            text = new ModelVisual3D();
+
             this.UpdateFloorModel(-1);
             floorViewport.Children.Add(model);
+            floorViewport.Children.Add(text);
 
             // Hide alignment cube
             AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
 
             trackingMouse = false;
 
-            //tmp();
+            this.SetupHardcodedCamera();
+            
+            // Hardcode proof of concept
+            double textHeight = 0.05;
+            floorViewport.Children.Add(CreateTextLabel3D("INSTR 0",Brushes.AntiqueWhite, true, textHeight, new Point3D(0.5, 0.01, -2 - textHeight), new Vector3D(-1,0,0), new Vector3D(0,0,1)));
+            floorViewport.Children.Add(CreateTextLabel3D("INSTR 1",Brushes.AntiqueWhite, true, textHeight, new Point3D(-0.5, 0.01, -2 - textHeight), new Vector3D(-1,0,0), new Vector3D(0,0,1)));
+            floorViewport.Children.Add(CreateTextLabel3D("INSTR 2",Brushes.AntiqueWhite, true, textHeight, new Point3D(0.5, 0.01, -3 - textHeight), new Vector3D(-1,0,0), new Vector3D(0,0,1)));
+            floorViewport.Children.Add(CreateTextLabel3D("INSTR 3",Brushes.AntiqueWhite, true, textHeight, new Point3D(-0.5, 0.01, -3 - textHeight), new Vector3D(-1,0,0), new Vector3D(0,0,1)));
         }
 
         public void Draw(int curQuadrant, String[] instrNames)
         {
-            if(!this.calibrating)
+            this.UpdateFloorModel(curQuadrant);
+        }
+
+        /// <summary>
+        /// Creates a ModelVisual3D containing a text label.
+        /// Source: http://ericsink.com/wpf3d/4_Text.html
+        /// </summary>
+        /// <param name="text">The string</param>
+        /// <param name="textColor">The color of the text.</param>
+        /// <param name="bDoubleSided">Visible from both sides?</param>
+        /// <param name="height">Height of the characters</param>
+        /// <param name="center">The center of the label</param>
+        /// <param name="over">Horizontal direction of the label</param>
+        /// <param name="up">Vertical direction of the label</param>
+        /// <returns>Suitable for adding to your Viewport3D</returns>
+        public static ModelVisual3D CreateTextLabel3D(
+            string text,
+            Brush textColor,
+            bool bDoubleSided,
+            double height,
+            Point3D center,
+            Vector3D over,
+            Vector3D up)
+        {
+            // First we need a textblock containing the text of our label
+            TextBlock tb = new TextBlock(new System.Windows.Documents.Run(text));
+            tb.Foreground = textColor;
+            tb.FontFamily = new FontFamily("Arial");
+
+            // Now use that TextBlock as the brush for a material
+            DiffuseMaterial mat = new DiffuseMaterial();
+            mat.Brush = new VisualBrush(tb);
+
+            // We just assume the characters are square
+            double width = text.Length * height;
+
+            // Since the parameter coming in was the center of the label,
+            // we need to find the four corners
+            // p0 is the lower left corner
+            // p1 is the upper left
+            // p2 is the lower right
+            // p3 is the upper right
+            Point3D p0 = center - width / 2 * over - height / 2 * up;
+            Point3D p1 = p0 + up * 1 * height;
+            Point3D p2 = p0 + over * width;
+            Point3D p3 = p0 + up * 1 * height + over * width;
+
+            // Now build the geometry for the sign.  It's just a
+            // rectangle made of two triangles, on each side.
+
+            MeshGeometry3D mg = new MeshGeometry3D();
+            mg.Positions = new Point3DCollection();
+            mg.Positions.Add(p0);    // 0
+            mg.Positions.Add(p1);    // 1
+            mg.Positions.Add(p2);    // 2
+            mg.Positions.Add(p3);    // 3
+
+            if (bDoubleSided)
             {
-                this.UpdateFloorModel(curQuadrant);
-            } else
-            {
-                model.Content = new Model3DGroup(); // Messy
+                mg.Positions.Add(p0);    // 4
+                mg.Positions.Add(p1);    // 5
+                mg.Positions.Add(p2);    // 6
+                mg.Positions.Add(p3);    // 7
             }
 
+            mg.TriangleIndices.Add(0);
+            mg.TriangleIndices.Add(3);
+            mg.TriangleIndices.Add(1);
+            mg.TriangleIndices.Add(0);
+            mg.TriangleIndices.Add(2);
+            mg.TriangleIndices.Add(3);
 
-            //    // Draw center marker
-            //    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 10, floor.centroid.Y - 1, 20, 2));
-            //    dc.DrawRectangle(FlatColors.WHITE, null, new Rect(floor.centroid.X - 3, floor.centroid.Y - 4, 6, 8));
+            if (bDoubleSided)
+            {
+                mg.TriangleIndices.Add(4);
+                mg.TriangleIndices.Add(5);
+                mg.TriangleIndices.Add(7);
+                mg.TriangleIndices.Add(4);
+                mg.TriangleIndices.Add(7);
+                mg.TriangleIndices.Add(6);
+            }
 
-            //    // And the instrument to each partition
-            //    if (curQuadrant != -1)
-            //    {
-            //        dc.DrawText(TextBuilder(instrNames[0], flowDirection: FlowDirection.RightToLeft), new Point(floor.points[2].X - 10, floor.points[2].Y - 20));
-            //        dc.DrawText(TextBuilder(instrNames[1], flowDirection: FlowDirection.LeftToRight), new Point(floor.points[1].X + 10, floor.points[1].Y - 20));
-            //        dc.DrawText(TextBuilder(instrNames[2], flowDirection: FlowDirection.RightToLeft), new Point(floor.points[3].X - 10, floor.points[3].Y + 2));
-            //        dc.DrawText(TextBuilder(instrNames[3], flowDirection: FlowDirection.LeftToRight), new Point(floor.points[0].X + 10, floor.points[0].Y + 2));
-            //    }
+            // These texture coordinates basically stretch the
+            // TextBox brush to cover the full side of the label.
 
-            //    this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-            //}
+            mg.TextureCoordinates.Add(new Point(0, 1));
+            mg.TextureCoordinates.Add(new Point(0, 0));
+            mg.TextureCoordinates.Add(new Point(1, 1));
+            mg.TextureCoordinates.Add(new Point(1, 0));
 
+            if (bDoubleSided)
+            {
+                mg.TextureCoordinates.Add(new Point(1, 1));
+                mg.TextureCoordinates.Add(new Point(1, 0));
+                mg.TextureCoordinates.Add(new Point(0, 1));
+                mg.TextureCoordinates.Add(new Point(0, 0));
+            }
+
+            // And that's all.  Return the result.
+
+            ModelVisual3D mv3d = new ModelVisual3D();
+            mv3d.Content = new GeometryModel3D(mg, mat); ;
+            return mv3d;
         }
 
         public Material GetSurfaceMaterial(Color color)
@@ -183,6 +268,7 @@ namespace GesturalMusic
 
             this.startMousePoint = e.GetPosition(FloorCanvas);
         }
+
         private void FloorCanvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.trackingRightMouse = true;
@@ -194,6 +280,7 @@ namespace GesturalMusic
         {
             this.trackingMouse = false;
         }
+
         private void FloorCanvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             this.trackingRightMouse = false;
@@ -266,15 +353,6 @@ namespace GesturalMusic
                 case Key.E:
                     offset.Y = -delta;
                     break;
-                case Key.C:
-                    AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
-                    this.calibrating = false;
-                    this.calibrated = true;
-                    this.CloseKinect();
-                    break;
-                case Key.P:
-                    this.goTime = true;
-                    break;
             }
 
             this.UpdateCameraPosition(offset);
@@ -291,108 +369,10 @@ namespace GesturalMusic
             Console.WriteLine();
         }
 
-        private void tmp()
+        private void SetupHardcodedCamera()
         {
             this.FloorCamera.Position = new Point3D(-1.7, 1.5, 0.5);
             this.FloorCamera.LookDirection = new Vector3D(0.36, -0.5, -1.2);
-        }
-
-        public void Calibrate()
-        {
-            Console.WriteLine("Calibrating...");
-
-            if (this.kinectSensor == null)
-            {
-                this.kinectSensor = KinectSensor.GetDefault();
-            }
-
-            this.colorFrameReader = this.kinectSensor.ColorFrameSource.OpenReader();
-            if (this.colorFrameReader != null)
-            {
-                this.colorFrameReader.FrameArrived += this.Reader_FrameArrived;
-            }
-        }
-
-        private void Reader_FrameArrived(object sender, ColorFrameArrivedEventArgs e)
-        {
-            if (this.calibrated)
-            {
-                this.EndCalibration();
-            }
-            using (ColorFrame colorFrame = e.FrameReference.AcquireFrame())
-            {
-                if (colorFrame != null)
-                {
-                    var bitmap = colorFrame.ToBitmap();
-                    //bitmap.Save("test.bmp");
-                    //screen.Source = bitmap; // Display
-
-                    if (this.goTime)
-                    {
-                        System.Windows.Media.Imaging.BitmapEncoder encoder = new System.Windows.Media.Imaging.BmpBitmapEncoder();
-                        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
-                        System.IO.MemoryStream ms = new System.IO.MemoryStream();
-
-                        encoder.Save(ms);
-                        System.Drawing.Bitmap b = new System.Drawing.Bitmap(ms);
-
-                        Emgu.CV.Image<Bgr, Byte> imageFrame = new Image<Bgr, Byte>(b);
-
-                        //// ----------------------------------------------------------------------
-
-                        System.Drawing.Size patternSize = new System.Drawing.Size(6, 6);
-                        Emgu.CV.Util.VectorOfPoint corners = new Emgu.CV.Util.VectorOfPoint();
-
-                        bool test = CvInvoke.FindChessboardCorners(imageFrame, patternSize, corners);
-
-                        Console.WriteLine("Calibration Success: " + test);
-                        foreach (System.Drawing.Point cornerPoint in corners.ToArray())
-                        {
-                            Console.WriteLine(cornerPoint.X + ", " + cornerPoint.Y);
-                        }
-                        Console.WriteLine();
-
-                        this.calibrated = true;
-                    }
-                }
-            }
-        }
-
-        private void EndCalibration()
-        {
-            AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
-            this.calibrating = false;
-            this.calibrated = true;
-            this.CloseKinect();
-            Console.WriteLine("Calibration complete.");
-        }
-
-        private void FloorWindow_Closing(object sender, CancelEventArgs e)
-        {
-            this.CloseKinect();
-        }
-
-        private void CloseKinect()
-        {
-            if (this.colorFrameReader != null)
-            {
-                this.colorFrameReader.Dispose();
-                this.colorFrameReader = null;
-            }
-
-            if (this.kinectSensor != null)
-            {
-                this.kinectSensor.Close();
-                this.kinectSensor = null;
-            }
-        }
-
-        private void CalibrateButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.calibrating = true;
-            AlignmentCube.Transform = new ScaleTransform3D(1, 1, 1);
-
-            this.Calibrate();
         }
     }
 }
