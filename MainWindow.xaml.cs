@@ -495,7 +495,7 @@
 
                         if (MainWindow.playingMode == MainWindow.ADVANCED_MODE)
                         {
-                            this.decidePartitionToBeChecked(b, joints, jointPoints, dc);
+                            this.DrawCurrentPartition(b, joints, jointPoints, dc);
                             //this.InstrumentSelect(b, joints, jointPoints, dc );
                         }
                         else
@@ -632,7 +632,7 @@
         private void decidePartitionToBeChecked(Body b, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
         {
             // DOUBLE LEFT RIGHT PARTITIONS
-            if(PartitionManager.currentPartitionType == PartitionType.DoubleLeftRight)
+            if (PartitionManager.currentPartitionType == PartitionType.DoubleLeftRight)
             {
                 int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
 
@@ -662,16 +662,16 @@
                     {
                         string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
 
-                        if(temp != "void")
+                        if (temp != "void")
                         {
-                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);      
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
                         }
                     }
                 }
             } // END DOUBLE LEFT RIGHT PARTITIONS
 
             // START DOUBLE FRONT BACK PARTITIONS
-            else if(PartitionManager.currentPartitionType == PartitionType.DoubleFrontBack)
+            else if (PartitionManager.currentPartitionType == PartitionType.DoubleFrontBack)
             {
                 int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
 
@@ -710,10 +710,10 @@
             } // END DOUBLE FRONT BACK PARTITIONS
 
             // START QUAD PARTITIONS
-            else if(PartitionManager.currentPartitionType == PartitionType.Quad)
+            else if (PartitionManager.currentPartitionType == PartitionType.Quad)
             {
                 int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
-                
+
                 // Check if in partition 0
                 if (whichPartitionAmIIn == 0)
                 {
@@ -782,7 +782,7 @@
                 }
             } // END QUAD PARTITIONS
 
-            
+
             // DEFAULT
             // START SINGLE PARTITION
             else
@@ -799,7 +799,7 @@
                     {
                         string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
 
-                        if (temp != "void")                        
+                        if (temp != "void")
                         {
                             changeValuesinPartitionManager(whichPartitionAmIIn, temp);
                         }
@@ -817,7 +817,10 @@
             {
                 displaySetConfirmation(drawingContext, PartitionManager.val3);
             }
+        }
 
+        private void DrawCurrentPartition(Body b, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
+        {
             // display current location
             drawingContext.DrawRectangle(
                     Brushes.DarkGray,
