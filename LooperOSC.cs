@@ -29,6 +29,16 @@ namespace GesturalMusic
             oscLoop = new UdpWriter(MainWindow.oscHost, MainWindow.looperOscPort);
         }
 
+        public String GetState()
+        {
+            if (isRecording) return "RECD";
+            if (isOverdubbing) return "ODUB";
+            if (isPlaying) return "PLAY";
+            if (isStopped) return "STOP";
+
+            return "STOP";
+        }
+
         public void record()
         {
             if (!isRecording)

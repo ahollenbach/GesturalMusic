@@ -129,7 +129,7 @@
         /// <summary>
         /// The port to send looper information to: default 22344
         /// </summary>
-        public static int looperOscPort = 22344;
+        public static int looperOscPort = 2345;
 
         /// <summary>
         /// Current status text to display
@@ -185,7 +185,7 @@
             oscHost = RecipientIpAddress.Text;
             Console.WriteLine(oscHost);
             osc = new UdpWriter(oscHost, oscPort);
-
+            LooperOSC.ResetOsc();
             // Save in settings
             //UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
             //UserSettings.Default.Save();
@@ -832,6 +832,7 @@
                                                               new Typeface(MainWindow.FONT_FAMILY),
                                                               20, System.Windows.Media.Brushes.White),
                                                               new Point(this.displayWidth / 2 - 6, this.displayHeight-28));
+            this.DisplayLooperState(drawingContext, looper.GetState());
         }
 
         /// <summary>
@@ -969,6 +970,24 @@
             FormattedText writeThis = new FormattedText(displayThis, new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 15.0, Brushes.White);
             drawingContext.DrawText(writeThis, textOrigin);
         }
+
+        private void DisplayLooperState(DrawingContext drawingContext, string displayThis)
+        {
+            Point textOrigin = new Point(430, 40);
+            Point ellipseOrigin = new Point(450, 50);
+            // Denotes whether current region has been set or 
+
+            SolidColorBrush color = FlatColors.LIGHT_BLUE;
+            if (displayThis == "RECD") color = FlatColors.LIGHT_RED;
+            if (displayThis == "ODUB") color = FlatColors.LIGHT_ORANGE;
+            if (displayThis == "PLAY") color = FlatColors.LIGHT_GREEN;
+            if (displayThis == "STOP") color = FlatColors.LIGHT_BLUE;
+
+            drawingContext.DrawEllipse(color, new Pen(color, 1), ellipseOrigin, 40, 40);
+            FormattedText writeThis = new FormattedText(displayThis, new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 15.0, Brushes.White);
+            drawingContext.DrawText(writeThis, textOrigin);
+        }
+
         /// <summary>
         /// Draws a body
         /// </summary>
