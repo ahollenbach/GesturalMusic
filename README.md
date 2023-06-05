@@ -3,6 +3,7 @@ Gestural Music
 
 The project allows a single user to create music through gestures using the Kinect v2 and Ableton Live. The system supports MIDI note generation, looping, partitioning the physical space for control of up to four separate instruments at once, and more, allowing for a user to build their own virtual band.
 
+⚠️ _This project is no longer maintained. You can reach out to the author for more information, to which I will do my best to reply._
 
 ## 1. Getting Started
 
