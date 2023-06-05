@@ -1,0 +1,127 @@
+﻿using Microsoft.Kinect;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GesturalMusic
+{
+    class Calibration
+    {
+        KinectSensor kinectSensor;
+
+        ColorFrameReader colorFrameReader;
+        bool calibrated = false;
+        bool calibrating = false;
+        bool goTime = false;
+
+        public Calibration()
+        {
+
+        }
+
+        public void Start()
+        {
+            this.calibrating = true;
+            AlignmentCube.Transform = new ScaleTransform3D(1, 1, 1);
+        }
+
+        public void Calibrate()
+        {
+            Console.WriteLine("Calibrating...");
+
+            if (this.kinectSensor == null)
+            {
+                this.kinectSensor = KinectSensor.GetDefault();
+            }
+
+            this.colorFrameReader = this.kinectSensor.ColorFrameSource.OpenReader();
+            if (this.colorFrameReader != null)
+            {
+                this.colorFrameReader.FrameArrived += this.Reader_FrameArrived;
+            }
+        }
+
+        private void Reader_FrameArrived(object sender, ColorFrameArrivedEventArgs e)
+        {
+            if (this.calibrated)
+            {
+                this.EndCalibration();
+            }
+            using (ColorFrame colorFrame = e.FrameReference.AcquireFrame())
+            {
+                if (colorFrame != null)
+                {
+                    var bitmap = colorFrame.ToBitmap();
+                    //bitmap.Save("test.bmp");
+                    //screen.Source = bitmap; // Display
+
+                    if (this.goTime)
+                    {
+                        System.Windows.Media.Imaging.BitmapEncoder encoder = new System.Windows.Media.Imaging.BmpBitmapEncoder();
+                        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+                        System.IO.MemoryStream ms = new System.IO.MemoryStream();
+
+                        encoder.Save(ms);
+                        System.Drawing.Bitmap b = new System.Drawing.Bitmap(ms);
+
+                        Emgu.CV.Image<Bgr, Byte> imageFrame = new Image<Bgr, Byte>(b);
+
+                        //// ----------------------------------------------------------------------
+
+                        System.Drawing.Size patternSize = new System.Drawing.Size(6, 6);
+                        Emgu.CV.Util.VectorOfPoint corners = new Emgu.CV.Util.VectorOfPoint();
+
+                        bool test = CvInvoke.FindChessboardCorners(imageFrame, patternSize, corners);
+
+                        Console.WriteLine("Calibration Success: " + test);
+                        foreach (System.Drawing.Point cornerPoint in corners.ToArray())
+                        {
+                            Console.WriteLine(cornerPoint.X + ", " + cornerPoint.Y);
+                        }
+                        Console.WriteLine();
+
+                        this.calibrated = true;
+                    }
+                }
+            }
+        }
+
+        private void EndCalibration()
+        {
+            AlignmentCube.Transform = new ScaleTransform3D(0, 0, 0);
+            this.calibrating = false;
+            this.calibrated = true;
+            this.CloseKinect();
+            Console.WriteLine("Calibration complete.");
+        }
+
+        private void CloseKinect()
+        {
+            if (this.colorFrameReader != null)
+            {
+                this.colorFrameReader.Dispose();
+                this.colorFrameReader = null;
+            }
+
+            if (this.kinectSensor != null)
+            {
+                this.kinectSensor.Close();
+                this.kinectSensor = null;
+            }
+        }
+
+        private void CalibrateButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.calibration
+
+            this.Calibrate();
+        }
+
+        private void FloorWindow_Closing(object sender, CancelEventArgs e)
+        {
+            this.CloseKinect();
+        }
+    }
+}

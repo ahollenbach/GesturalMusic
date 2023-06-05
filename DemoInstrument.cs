@@ -15,7 +15,7 @@ namespace GesturalMusic
         public readonly static String INSTRUMENT = "Instrument";
 
 
-        public string name;
+        public new string name;
         private Filter filter;
 
         // For rate limiting

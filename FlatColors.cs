@@ -17,6 +17,7 @@ namespace GesturalMusic
 
         public readonly static SolidColorBrush LIGHT_BLUE  = new SolidColorBrush(Color.FromRgb(52, 152, 219));
         public readonly static SolidColorBrush LIGHT_RED   = new SolidColorBrush(Color.FromRgb(231, 76, 60));
+        public readonly static SolidColorBrush LIGHT_ORANGE   = new SolidColorBrush(Color.FromRgb(230, 126, 34));
         public readonly static SolidColorBrush LIGHT_GREEN = new SolidColorBrush(Color.FromRgb(46, 204, 113));
         public readonly static SolidColorBrush YELLOW      = new SolidColorBrush(Color.FromRgb(241, 196, 15));
 

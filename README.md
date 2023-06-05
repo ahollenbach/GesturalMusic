@@ -23,6 +23,7 @@ Unfortunately, the project is sensitive to the requirements of the Kinect SDK an
 2. Copy [Other/LooperOSC/midifile.class](Other/LooperOSC/midifile.class) to ```<Max_Directory>/Max/Cycling '74/java/classes```
   1. Alternatively, you can copy it to another directory and add the line ```max.dynamic.class.dir <path_to_class>``` to ```<Max_Directory>/Max/Cycling '74/java/max.java.config.txt```
 3. Copy [Other/LooperOSC/OSC-route.mxe](Other/LooperOSC/OSC-route.mxe) to ```<Max_Directory>/Max\Cycling '74\max-externals```
+4. You also need to install Emgu CV. You may have to copy some of the dll's to your build/bin directory in order for calibration to work.
 
 ## 3. Running
 

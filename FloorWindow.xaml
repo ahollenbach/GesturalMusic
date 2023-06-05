@@ -1,23 +1,68 @@
 ﻿<Window x:Class="GesturalMusic.FloorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FloorWindow" Height="800" Width="1100">
-    <Grid Margin="0 0 0 0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <Viewbox>
-            <Image Source="{Binding ImageSource}" Stretch="UniformToFill" Name="FloorCanvas"
-                   MouseDown="FloorCanvas_MouseDown" 
-                   MouseUp="FloorCanvas_MouseUp" 
-                   MouseMove="FloorCanvas_MouseMove"
-                   MouseRightButtonDown="FloorCanvas_MouseRightButtonDown"
-                   MouseRightButtonUp="FloorCanvas_MouseRightButtonUp">
-            </Image>
-        </Viewbox>
-
+        Title="FloorWindow" Height="800" Width="1100"
+        Background="Black"
+        
+        MouseDown="FloorCanvas_MouseDown" 
+        MouseUp="FloorCanvas_MouseUp" 
+        MouseMove="FloorCanvas_MouseMove"
+        MouseRightButtonDown="FloorCanvas_MouseRightButtonDown"
+        MouseRightButtonUp="FloorCanvas_MouseRightButtonUp"
+        KeyDown="Window_KeyDown" WindowState="Maximized" WindowStyle="None"
+        >
+    <Grid x:Name="FloorCanvas">
+        <!--<Button x:Name="CalibrateButton" Content="Calibrate" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#7F2B2B2B" BorderBrush="{x:Null}" Foreground="#FFCFCFCF" OpacityMask="Black" Opacity="0.7"
+                Click="CalibrateButton_Click" />-->
+        <Image x:Name="screen"/>
+        <Viewport3D x:Name="floorViewport" ClipToBounds="True" HorizontalAlignment="Stretch">
+            <Viewport3D.Camera>
+                <PerspectiveCamera x:Name="FloorCamera"
+    				LookDirection="0,-0.5,-5"
+    				UpDirection="0,1,0"
+    				Position="0,2,5" 
+                      />
+            </Viewport3D.Camera>
+            <ModelVisual3D>
+                <ModelVisual3D.Content>
+                    <Model3DGroup>
+                        <AmbientLight x:Name="ambientLight" Color="#FFFFFF"/>
+                        <GeometryModel3D x:Name="AlignmentCube">
+                            <GeometryModel3D.Geometry>
+                                <MeshGeometry3D
+                                        Positions = "-1 0.01 -4  -1 0.01 -2  1 0.01 -2  1 0.01 -4"
+                                        TriangleIndices = "0 1 2  2 3 0"
+                                        TextureCoordinates="0 1  1 1  1 0  0 0" />
+                            </GeometryModel3D.Geometry>
+                            <GeometryModel3D.Material>
+                                <DiffuseMaterial>
+                                    <DiffuseMaterial.Brush>
+                                        <ImageBrush ImageSource="Images\Chessboard.png"/>
+                                    </DiffuseMaterial.Brush>
+                                </DiffuseMaterial>
+                            </GeometryModel3D.Material>
+                        </GeometryModel3D>
+                        <GeometryModel3D>
+                            <GeometryModel3D.Geometry>
+                                <MeshGeometry3D x:Name="Kinect"
+                                      Positions="-0.125 0 0  0.125 0 0  -0.125 0.05 0  0.125 0.05 0  -0.125 0 0.07  0.125 0 0.07  -0.125 0.05 0.07  0.125 0.05 0.07"
+                                      TriangleIndices="2 3 1  2 1 0  7 1 3  7 5 1  6 5 7  6 4 5  6 2 0  2 0 4  2 7 3  2 6 7  0 1 5  0 5 4" />
+                            </GeometryModel3D.Geometry>
+                            <!--One of the triangles is wrong-->
+                            <GeometryModel3D.Material>
+                                <DiffuseMaterial>
+                                    <DiffuseMaterial.Brush>
+                                        <SolidColorBrush Color="Cyan" Opacity="1"/>
+                                    </DiffuseMaterial.Brush>
+                                </DiffuseMaterial>
+                            </GeometryModel3D.Material>
+                            <GeometryModel3D.Transform>
+                                <TranslateTransform3D x:Name="KinectTransform" OffsetX="0" OffsetY="1" OffsetZ="0" />
+                            </GeometryModel3D.Transform>
+                        </GeometryModel3D>
+                    </Model3DGroup>
+                </ModelVisual3D.Content>
+            </ModelVisual3D>
+        </Viewport3D>
     </Grid>
 </Window>

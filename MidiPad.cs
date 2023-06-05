@@ -10,7 +10,7 @@ namespace GesturalMusic
 {
     class MidiPad : Instrument
     {
-        public string name;
+        public new string name;
 
         private DateTime lastTimeLPadPlayed;
         private DateTime lastTimeRPadPlayed;
@@ -43,11 +43,6 @@ namespace GesturalMusic
             Console.WriteLine("Playing: " + this.name + " " + pitch + " " + velocity + " " + duration + " " + midiChannel);
             OscElement elem = new OscElement("/" + this.name, pitch, velocity, duration, midiChannel);
             MainWindow.osc.Send(elem);
-        }
-
-        new public void StopNote()
-        {
-            //noteOn.SwitchOff();
         }
 
         new public bool CheckAndPlayNote(Body body)

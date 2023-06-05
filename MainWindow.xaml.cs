@@ -19,8 +19,6 @@
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        string val1 = "void";
-
         public readonly static String FONT_FAMILY = "Verdana";
 
         /// <summary>
@@ -131,7 +129,7 @@
         /// <summary>
         /// The port to send looper information to: default 22344
         /// </summary>
-        public static int looperOscPort = 22344;
+        public static int looperOscPort = 2345;
 
         /// <summary>
         /// Current status text to display
@@ -175,12 +173,11 @@
         /// <param name="e">event arguments</param>
         private void LaunchProjectorScreen(object sender, RoutedEventArgs e)
         {
-            if (floorWindow == null)
+            if (this.floorWindow == null || !this.floorWindow.IsVisible)
             {
-                floorWindow = new FloorWindow(this.displayWidth, this.displayHeight);
-                floorWindow.Show();
+                this.floorWindow = new FloorWindow();
+                this.floorWindow.Show();
             }
-               
         }
 
         private void SetRecipient(object sender, RoutedEventArgs e)
@@ -188,7 +185,7 @@
             oscHost = RecipientIpAddress.Text;
             Console.WriteLine(oscHost);
             osc = new UdpWriter(oscHost, oscPort);
-
+            LooperOSC.ResetOsc();
             // Save in settings
             //UserSettings.Default.RecipientIpAddress = RecipientIpAddress.Text;
             //UserSettings.Default.Save();
@@ -360,7 +357,6 @@
             {
                 this.bodyFrameReader.FrameArrived += this.Reader_FrameArrived;
             }
-
         }
 
         /// <summary>
@@ -410,7 +406,6 @@
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
 
-                    // Run the core body analysis routine 
                     Update(bodyFrame);
                 }
             }
@@ -454,7 +449,7 @@
                     dc.DrawRectangle(FlatColors.WHITE, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                     // Draw our floor
-                    if (floorWindow != null) floorWindow.Draw(-1, new String[4]);
+                    if (this.floorWindow != null) this.floorWindow.Draw(1, new String[4]);
                     return;
                 }
 
@@ -500,7 +495,7 @@
 
                         if (MainWindow.playingMode == MainWindow.ADVANCED_MODE)
                         {
-                            this.decidePartitionToBeChecked(b, joints, jointPoints, dc);
+                            this.DrawCurrentPartition(b, joints, jointPoints, dc);
                             //this.InstrumentSelect(b, joints, jointPoints, dc );
                         }
                         else
@@ -522,15 +517,15 @@
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
             }
 
-            if (floorWindow != null)
+            if (this.floorWindow != null)
             {
-                // do this because vs is being stupid
-                String[] names = new String[4];
-                for (int i = 0; i < 4; i++)
+                String[] names = new String[instruments.Length];
+                for (int i = 0; i < instruments.Length; i++)
                 {
                     names[i] = instruments[i].name;
                 }
-                floorWindow.Draw(PartitionManager.GetPartition(body.Joints[JointType.SpineMid].Position), names);
+
+                this.floorWindow.Draw(PartitionManager.GetPartition(body.Joints[JointType.SpineMid].Position), names);
             }
         }
 
@@ -637,7 +632,7 @@
         private void decidePartitionToBeChecked(Body b, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
         {
             // DOUBLE LEFT RIGHT PARTITIONS
-            if(PartitionManager.currentPartitionType == PartitionType.DoubleLeftRight)
+            if (PartitionManager.currentPartitionType == PartitionType.DoubleLeftRight)
             {
                 int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
 
@@ -667,16 +662,16 @@
                     {
                         string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
 
-                        if(temp != "void")
+                        if (temp != "void")
                         {
-                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);      
+                            changeValuesinPartitionManager(whichPartitionAmIIn, temp);
                         }
                     }
                 }
             } // END DOUBLE LEFT RIGHT PARTITIONS
 
             // START DOUBLE FRONT BACK PARTITIONS
-            else if(PartitionManager.currentPartitionType == PartitionType.DoubleFrontBack)
+            else if (PartitionManager.currentPartitionType == PartitionType.DoubleFrontBack)
             {
                 int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
 
@@ -715,10 +710,10 @@
             } // END DOUBLE FRONT BACK PARTITIONS
 
             // START QUAD PARTITIONS
-            else if(PartitionManager.currentPartitionType == PartitionType.Quad)
+            else if (PartitionManager.currentPartitionType == PartitionType.Quad)
             {
                 int whichPartitionAmIIn = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position);
-                
+
                 // Check if in partition 0
                 if (whichPartitionAmIIn == 0)
                 {
@@ -787,7 +782,7 @@
                 }
             } // END QUAD PARTITIONS
 
-            
+
             // DEFAULT
             // START SINGLE PARTITION
             else
@@ -804,7 +799,7 @@
                     {
                         string temp = InstrumentSelect(b, joints, jointPoints, drawingContext);
 
-                        if (temp != "void")                        
+                        if (temp != "void")
                         {
                             changeValuesinPartitionManager(whichPartitionAmIIn, temp);
                         }
@@ -822,18 +817,22 @@
             {
                 displaySetConfirmation(drawingContext, PartitionManager.val3);
             }
+        }
 
+        private void DrawCurrentPartition(Body b, IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext)
+        {
             // display current location
             drawingContext.DrawRectangle(
                     Brushes.DarkGray,
                     null,
-                    new Rect(this.displayWidth / 2 - 30, 0, 60, 20));
+                    new Rect(this.displayWidth / 2 - 36, this.displayHeight-30, 72, 30));
             String curPartition = PartitionManager.GetPartition(b.Joints[JointType.SpineMid].Position).ToString();
             drawingContext.DrawText(new FormattedText(curPartition, CultureInfo.GetCultureInfo("en-us"),
                                                               FlowDirection.LeftToRight,
                                                               new Typeface(MainWindow.FONT_FAMILY),
-                                                              18, System.Windows.Media.Brushes.Black),
-                                                              new Point(this.displayWidth / 2 - 10, 1));
+                                                              20, System.Windows.Media.Brushes.White),
+                                                              new Point(this.displayWidth / 2 - 6, this.displayHeight-28));
+            this.DisplayLooperState(drawingContext, looper.GetState());
         }
 
         /// <summary>
@@ -874,8 +873,8 @@
 
             DepthSpacePoint sl = this.coordinateMapper.MapCameraPointToDepthSpace(sLeftc);
 
-            float textXOffset = -10;
-            float textYOffset = -15;
+            float textXOffset = -15;
+            float textYOffset = -20;
 
             float i0XOffset = -150;
             float i0YOffset = -30;
@@ -964,13 +963,31 @@
         /// <param name="drawingContext"></param>
         private void displaySetConfirmation(DrawingContext drawingContext, string displayThis)
         {
-            Point textOrigin = new Point(420, 40);
+            Point textOrigin = new Point(430, 40);
             Point ellipseOrigin = new Point(450, 50);
             // Denotes whether current region has been set or unset
-            drawingContext.DrawEllipse(Brushes.ForestGreen, new Pen(Brushes.ForestGreen, 1), ellipseOrigin, 40, 40);
+            drawingContext.DrawEllipse(FlatColors.LIGHT_BLUE, new Pen(FlatColors.LIGHT_BLUE, 1), ellipseOrigin, 40, 40);
             FormattedText writeThis = new FormattedText(displayThis, new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 15.0, Brushes.White);
             drawingContext.DrawText(writeThis, textOrigin);
         }
+
+        private void DisplayLooperState(DrawingContext drawingContext, string displayThis)
+        {
+            Point textOrigin = new Point(430, 40);
+            Point ellipseOrigin = new Point(450, 50);
+            // Denotes whether current region has been set or 
+
+            SolidColorBrush color = FlatColors.LIGHT_BLUE;
+            if (displayThis == "RECD") color = FlatColors.LIGHT_RED;
+            if (displayThis == "ODUB") color = FlatColors.LIGHT_ORANGE;
+            if (displayThis == "PLAY") color = FlatColors.LIGHT_GREEN;
+            if (displayThis == "STOP") color = FlatColors.LIGHT_BLUE;
+
+            drawingContext.DrawEllipse(color, new Pen(color, 1), ellipseOrigin, 40, 40);
+            FormattedText writeThis = new FormattedText(displayThis, new CultureInfo("en-US"), FlowDirection.LeftToRight, new Typeface("Arial"), 15.0, Brushes.White);
+            drawingContext.DrawText(writeThis, textOrigin);
+        }
+
         /// <summary>
         /// Draws a body
         /// </summary>
